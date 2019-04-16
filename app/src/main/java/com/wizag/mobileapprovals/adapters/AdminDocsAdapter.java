@@ -1,9 +1,8 @@
 package com.wizag.mobileapprovals.adapters;
 
 import android.content.Context;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +11,7 @@ import android.widget.TextView;
 
 import com.wizag.mobileapprovals.R;
 import com.wizag.mobileapprovals.models.AdminDocsModel;
+import com.wizag.mobileapprovals.ui.Activity_Approval;
 
 import java.util.List;
 
@@ -85,25 +85,7 @@ public class AdminDocsAdapter extends RecyclerView.Adapter<AdminDocsAdapter.MyVi
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle("Set " + docsData.get(listPosition).getDocType() + " Approvals")
-                        .setMessage("Proceed to set document approvals")
-                        .setCancelable(false)
-                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-//                                Toast.makeText(context, "Selected Option: YES", Toast.LENGTH_SHORT).show();
-                            }
-                        })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-//                                Toast.makeText(context, "Selected Option: No", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                //Creating dialog box
-                AlertDialog dialog = builder.create();
-                dialog.show();
+                context.startActivity(new Intent(context, Activity_Approval.class));
             }
         });
 

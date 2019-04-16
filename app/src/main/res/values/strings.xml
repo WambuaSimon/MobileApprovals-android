@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">MobileApprovals</string>
+    <string name="service_prompt">Select Approver</string>
+    <string-array name="service_arrays">
+        <item>--Select First Approver--</item>
+
+    </string-array>
 </resources>

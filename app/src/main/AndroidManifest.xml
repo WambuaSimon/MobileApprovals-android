@@ -12,6 +12,7 @@
         android:roundIcon="@drawable/esl"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".ui.Activity_Approval"></activity>
         <activity android:name=".ui.Activity_AdminLogin">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,10 +20,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.Activity_Admin_Docs">
-
-        </activity>
-        <activity android:name=".MainActivity"></activity>
+        <activity android:name=".ui.Activity_Admin_Docs" />
+        <activity android:name=".MainActivity" />
     </application>
 
 </manifest>

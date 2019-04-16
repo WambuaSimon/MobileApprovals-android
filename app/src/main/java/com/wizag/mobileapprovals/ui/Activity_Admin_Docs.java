@@ -59,7 +59,7 @@ public class Activity_Admin_Docs extends AppCompatActivity {
         pDialog.setMessage("Fetching Documents...");
         pDialog.setCancelable(false);
         pDialog.show();
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, "https://api.myjson.com/bins/vu9pw", new Response.Listener<String>() {
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, "https://api.myjson.com/bins/x2uqg", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
@@ -128,8 +128,6 @@ public class Activity_Admin_Docs extends AppCompatActivity {
 
 
 
-//                        JSONObject site = docsObject.getJSONObject("site");
-//                        String name = site.getString("name");
                             model_docs.setDocType(DocType);
                             model_docs.setDocName(DocName);
                             model_docs.setAccountName(AccountName);

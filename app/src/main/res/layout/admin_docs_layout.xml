@@ -151,7 +151,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
         android:layout_marginTop="32dp"
-        android:src="@android:drawable/ic_input_add"
+        android:src="@drawable/set_approval"
         android:tint="@android:color/white"
         app:fabCustomSize="40dp"
         app:layout_anchor="@id/card"
