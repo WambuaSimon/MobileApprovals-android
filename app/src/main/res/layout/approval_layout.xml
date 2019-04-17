@@ -16,6 +16,7 @@
     android:weightSum="1"
     android:padding="@dimen/_16sdp"
     android:layout_width="match_parent"
+    android:gravity="center"
     android:layout_height="wrap_content">
 
     <TextView
@@ -32,12 +33,13 @@
         android:layout_height="0dp"
         android:layout_weight="0.1" />
 
-    <CheckBox
-
+    <ImageView
+        android:id="@+id/imageview_reorder"
         android:layout_width="0dp"
+        android:backgroundTint="@color/colorPrimary"
         android:layout_weight="0.1"
-        android:id="@+id/checkbox"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/drag" />
 
 </LinearLayout>
 </android.support.v7.widget.CardView>

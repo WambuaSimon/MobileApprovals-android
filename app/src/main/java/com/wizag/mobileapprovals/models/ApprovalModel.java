@@ -6,7 +6,19 @@ public class ApprovalModel {
 
     String groupID;
     String groupName;
-    private boolean isSelected;
+
+    public ApprovalModel() {
+    }
+
+    public ApprovalModel(String groupID, String groupName) {
+        this.groupID = groupID;
+        this.groupName = groupName;
+    }
+    public ApprovalModel(ApprovalModel approvalModel) {
+        this.groupID = approvalModel.groupID;
+        this.groupName = approvalModel.groupName;
+    }
+
 
     public String getGroupName() {
         return groupName;
@@ -14,15 +26,6 @@ public class ApprovalModel {
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
-    }
-
-
-    public boolean isSelected() {
-        return isSelected;
-    }
-
-    public void setSelected(boolean selected) {
-        isSelected = selected;
     }
 
     public String getGroupID() {

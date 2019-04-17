@@ -14,6 +14,7 @@ Button signin;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_login);
+        setTitle("Admin Login");
 
         signin = findViewById(R.id.signin);
         signin.setOnClickListener(new View.OnClickListener() {

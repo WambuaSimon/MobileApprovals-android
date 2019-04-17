@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -17,27 +18,36 @@ import com.wizag.mobileapprovals.R;
 import com.wizag.mobileapprovals.adapters.ApprovalAdapter;
 import com.wizag.mobileapprovals.models.ApprovalModel;
 import com.wizag.mobileapprovals.utils.MySingleton;
+import com.wizag.mobileapprovals.utils.OnItemClickListener;
 import com.wizag.mobileapprovals.utils.RecyclerItemClickListener;
+import com.wizag.mobileapprovals.utils.SwipeAndDragHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Activity_Approval extends AppCompatActivity {
+public class Activity_Approval extends AppCompatActivity implements OnItemClickListener {
     RecyclerView recyclerView;
     ApprovalAdapter approval_adapter;
     List<ApprovalModel> approval_model;
     Button proceed;
+    JSONArray docs;
+    String grpID;
+    String grpName;
+    ApprovalModel approvals;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_approval);
+        setTitle("Set Approvals");
 
 
         recyclerView = findViewById(R.id.approval_recyclerview);
@@ -49,10 +59,12 @@ public class Activity_Approval extends AppCompatActivity {
 
         //initializing adapter
         approval_adapter = new ApprovalAdapter(approval_model, this);
+        SwipeAndDragHelper swipeAndDragHelper = new SwipeAndDragHelper(approval_adapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(swipeAndDragHelper);
+        approval_adapter.setTouchHelper(touchHelper);
         recyclerView.setAdapter(approval_adapter);
-        /*ADD DOC APPROVAL W/F*/
-
-
+        approval_adapter.setClickListener(this);
+        touchHelper.attachToRecyclerView(recyclerView);
 
 
         loadDocuments();
@@ -61,6 +73,24 @@ public class Activity_Approval extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 /*Dialog to confirm submission to db*/
+               for(int i = 0; i < approval_model.size(); i++){
+                   View view = recyclerView.getChildAt(i);
+                   final ApprovalModel approvalModel = approval_model.get(i);
+
+                   List<String> myList = new ArrayList<String>();
+                   myList.add(approvalModel.getGroupID());
+                   myList.add(approvalModel.getGroupName());
+
+                 for(String log : myList){
+                     Toast.makeText(getApplicationContext(), log, Toast.LENGTH_SHORT).show();
+
+                 }
+
+//
+
+               }
+
+
 
 
             }
@@ -73,7 +103,7 @@ public class Activity_Approval extends AppCompatActivity {
         pDialog.setMessage("Fetching Groups...");
         pDialog.setCancelable(false);
         pDialog.show();
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, "https://api.myjson.com/bins/kkr14", new Response.Listener<String>() {
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, "https://api.myjson.com/bins/n3fow", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
@@ -82,17 +112,17 @@ public class Activity_Approval extends AppCompatActivity {
                     pDialog.dismiss();
                     if (jsonObject != null) {
                         String message = jsonObject.getString("message");
-                        JSONArray docs = jsonObject.getJSONArray("groups");
+                        docs = jsonObject.getJSONArray("groups");
+
                         for (int k = 0; k < docs.length(); k++) {
-                            ApprovalModel approvals = new ApprovalModel();
+                            approvals = new ApprovalModel();
                             JSONObject docsObject = docs.getJSONObject(k);
 
 
-                            String grpID = docsObject.getString("GroupID");
-                            String grpName = docsObject.getString("GroupName");
+                            grpID = docsObject.getString("GroupID");
+                            grpName = docsObject.getString("GroupName");
 
 
-//
                             if (grpID.equalsIgnoreCase("1")) {
                                 grpName = "Accounting and Finance";
                             } else if (grpID.equalsIgnoreCase("2")) {
@@ -107,17 +137,19 @@ public class Activity_Approval extends AppCompatActivity {
                                 grpName = "Manager";
                             }
 
-
                             approvals.setGroupName(grpName);
                             approvals.setGroupID(grpID);
 
-                            if (approval_model.contains(grpID)) {
-                                /*do nothing*/
-//                                Toast.makeText(Activity_Approval.this, "Duplicate", Toast.LENGTH_SHORT).show();
-                            } else {
 
+                            if (approval_model.contains(grpName)) {
+
+
+                            } else {
                                 approval_model.add(approvals);
+
+
                             }
+
                         }
 
 
@@ -155,4 +187,13 @@ public class Activity_Approval extends AppCompatActivity {
 
 
     }
+
+
+    @Override
+    public void onClick(View view, int position) {
+//        final ApprovalModel approvalModel = approval_model.get(position);
+//        Toast.makeText(this, approvalModel.getGroupID(), Toast.LENGTH_SHORT).show();
+
+    }
 }
+

@@ -35,6 +35,7 @@ public class Activity_Admin_Docs extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_docs);
+        setTitle("Documents");
 
         add_doc = findViewById(R.id.add_doc);
         recyclerView = findViewById(R.id.recyclerView);
