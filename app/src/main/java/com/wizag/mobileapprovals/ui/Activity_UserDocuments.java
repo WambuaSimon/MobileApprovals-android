@@ -12,8 +12,8 @@ import com.android.volley.*;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.wizag.mobileapprovals.R;
-import com.wizag.mobileapprovals.adapters.AdminDocsAdapter;
-import com.wizag.mobileapprovals.models.AdminDocsModel;
+import com.wizag.mobileapprovals.adapters.UserDocAdapter;
+import com.wizag.mobileapprovals.models.UserDocsModel;
 import com.wizag.mobileapprovals.utils.MySingleton;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,12 +24,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Activity_Admin_Docs extends AppCompatActivity {
+public class Activity_UserDocuments extends AppCompatActivity {
     RecyclerView recyclerView;
-    AdminDocsAdapter adminDocsAdapter;
-    List<AdminDocsModel> docsModelList;
+    UserDocAdapter adminDocsAdapter;
+    List<UserDocsModel> docsModelList;
 
-    FloatingActionButton add_doc;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,14 +37,14 @@ public class Activity_Admin_Docs extends AppCompatActivity {
         setContentView(R.layout.activity_admin_docs);
         setTitle("Documents");
 
-        add_doc = findViewById(R.id.add_doc);
+
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         docsModelList = new ArrayList<>();
 
         //initializing adapter
-        adminDocsAdapter = new AdminDocsAdapter(docsModelList, this);
+        adminDocsAdapter = new UserDocAdapter(docsModelList, this);
         recyclerView.setAdapter(adminDocsAdapter);
         /*ADD DOC APPROVAL W/F*/
 
@@ -71,7 +71,7 @@ public class Activity_Admin_Docs extends AppCompatActivity {
                         String message = jsonObject.getString("message");
                         JSONArray docs = jsonObject.getJSONArray("documents");
                         for (int k = 0; k < docs.length(); k++) {
-                            AdminDocsModel model_docs = new AdminDocsModel();
+                            UserDocsModel model_docs = new UserDocsModel();
                             JSONObject docsObject = docs.getJSONObject(k);
 
 
@@ -119,7 +119,7 @@ public class Activity_Admin_Docs extends AppCompatActivity {
                                 AppStatus = "Partially Approved";
                             }
 
-                           else if(AppStatus.equalsIgnoreCase("3")){
+                            else if(AppStatus.equalsIgnoreCase("3")){
                                 AppStatus = "Approved";
                             }
 
@@ -139,7 +139,7 @@ public class Activity_Admin_Docs extends AppCompatActivity {
                             model_docs.setAppStatus(AppStatus);
 
 
-                            if (docsModelList.contains(DocType)) {
+                            if (docsModelList.contains(doc_id)) {
                                 /*do nothing*/
                             } else {
                                 docsModelList.add(model_docs);

@@ -3,18 +3,35 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="@dimen/_10sdp">
 
-    <TextView
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_45sdp"
-        android:gravity="center"
-        android:padding="@dimen/_7sdp"
-        android:text="Select Approvals Starting from the First Approval"
-        android:textColor="@android:color/black"
+        android:layout_height="wrap_content"
+        android:background="#999999"
+        android:orientation="vertical"
+        android:padding="@dimen/_7sdp">
 
-        android:textStyle="italic" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Select Approvals Starting from the First Approval"
+            android:textColor="@android:color/black"
+            android:textSize="15sp"
+            android:textStyle="italic" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Drag Cards to set approval levels and swipe to the right to remove groups"
+            android:textColor="@android:color/black"
+            android:textSize="15sp"
+
+            android:textStyle="italic" />
+    </LinearLayout>
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -41,7 +58,7 @@
             android:layout_marginTop="@dimen/_10sdp"
             android:background="@color/colorPrimary"
             android:padding="@dimen/_7sdp"
-            android:text="Proceed"
+            android:text="Submit"
             android:textColor="@android:color/white" />
 
     </RelativeLayout>

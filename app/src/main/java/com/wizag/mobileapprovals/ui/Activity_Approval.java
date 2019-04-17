@@ -1,25 +1,32 @@
 package com.wizag.mobileapprovals.ui;
 
+import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
 
-import com.android.volley.*;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.wizag.mobileapprovals.R;
 import com.wizag.mobileapprovals.adapters.ApprovalAdapter;
 import com.wizag.mobileapprovals.models.ApprovalModel;
 import com.wizag.mobileapprovals.utils.MySingleton;
-import com.wizag.mobileapprovals.utils.OnItemClickListener;
-import com.wizag.mobileapprovals.utils.RecyclerItemClickListener;
 import com.wizag.mobileapprovals.utils.SwipeAndDragHelper;
 
 import org.json.JSONArray;
@@ -27,10 +34,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Activity_Approval extends AppCompatActivity {
     RecyclerView recyclerView;
@@ -41,7 +45,8 @@ public class Activity_Approval extends AppCompatActivity {
     String grpID;
     String grpName;
     ApprovalModel approvals;
-
+    List<String> myList;
+    JSONArray approve;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,24 +77,31 @@ public class Activity_Approval extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 /*Dialog to confirm submission to db*/
-               for(int i = 0; i < approval_model.size(); i++){
-                   View view = recyclerView.getChildAt(i);
-                   final ApprovalModel approvalModel = approval_model.get(i);
+                JSONArray array = new JSONArray();
+                for (int i = 0; i < approval_model.size(); i++) {
+                    JSONObject obj = new JSONObject();
+                    final ApprovalModel approvalModel = approval_model.get(i);
 
-                   List<String> myList = new ArrayList<String>();
-                   myList.add(approvalModel.getGroupID());
-                   myList.add(approvalModel.getGroupName());
+                    String data;
+                    myList = new ArrayList<String>();
+                    myList.add(approvalModel.getGroupID());
 
-                 for(String log : myList){
-                     Toast.makeText(getApplicationContext(), log, Toast.LENGTH_SHORT).show();
-
-                 }
-
-//
-
-               }
+                    try {
+                        obj.put("id", approvalModel.getGroupID());
 
 
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    array.put(obj);
+                    Log.d("approvals_details", array.toString());
+
+
+//                    myList.add(approvalModel.getGroupName());
+//                    JSONArray myListArray = new JSONArray(myList);
+
+
+                }
 
 
             }
@@ -140,7 +152,7 @@ public class Activity_Approval extends AppCompatActivity {
                             approvals.setGroupID(grpID);
 
 
-                            if (approval_model.contains(grpName)) {
+                            if (approval_model.equals(grpID)) {
 
 
                             } else {
@@ -188,6 +200,8 @@ public class Activity_Approval extends AppCompatActivity {
     }
 
 
-
 }
+
+
+
 
