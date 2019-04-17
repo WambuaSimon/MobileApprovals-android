@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Activity_Approval extends AppCompatActivity implements OnItemClickListener {
+public class Activity_Approval extends AppCompatActivity {
     RecyclerView recyclerView;
     ApprovalAdapter approval_adapter;
     List<ApprovalModel> approval_model;
@@ -63,7 +63,6 @@ public class Activity_Approval extends AppCompatActivity implements OnItemClickL
         ItemTouchHelper touchHelper = new ItemTouchHelper(swipeAndDragHelper);
         approval_adapter.setTouchHelper(touchHelper);
         recyclerView.setAdapter(approval_adapter);
-        approval_adapter.setClickListener(this);
         touchHelper.attachToRecyclerView(recyclerView);
 
 
@@ -189,11 +188,6 @@ public class Activity_Approval extends AppCompatActivity implements OnItemClickL
     }
 
 
-    @Override
-    public void onClick(View view, int position) {
-//        final ApprovalModel approvalModel = approval_model.get(position);
-//        Toast.makeText(this, approvalModel.getGroupID(), Toast.LENGTH_SHORT).show();
 
-    }
 }
 

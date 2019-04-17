@@ -26,7 +26,6 @@ public class ApprovalAdapter extends RecyclerView.Adapter<ApprovalAdapter.MyView
     private List<ApprovalModel> docsData;
     Context context;
     private ItemTouchHelper touchHelper;
-    private OnItemClickListener clickListener;
 
     @Override
     public void onViewMoved(int oldPosition, int newPosition) {
@@ -42,12 +41,13 @@ public class ApprovalAdapter extends RecyclerView.Adapter<ApprovalAdapter.MyView
         docsData.remove(position);
         notifyItemRemoved(position);
     }
+
     public void setTouchHelper(ItemTouchHelper touchHelper) {
 
         this.touchHelper = touchHelper;
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class MyViewHolder extends RecyclerView.ViewHolder {
 
         ImageView imageview_reorder;
         TextView group;
@@ -58,17 +58,11 @@ public class ApprovalAdapter extends RecyclerView.Adapter<ApprovalAdapter.MyView
             this.imageview_reorder = itemView.findViewById(R.id.imageview_reorder);
             this.group = itemView.findViewById(R.id.group);
             this.card = itemView.findViewById(R.id.card);
-            itemView.setOnClickListener(this);
 
 
         }
 
-        @Override
-        public void onClick(View v) {
-            if (clickListener != null) clickListener.onClick(itemView, getAdapterPosition());
 
-
-        }
     }
 
     public ApprovalAdapter(List<ApprovalModel> data, Context context) {
@@ -88,11 +82,6 @@ public class ApprovalAdapter extends RecyclerView.Adapter<ApprovalAdapter.MyView
     public void onBindViewHolder(final MyViewHolder holder, final int listPosition) {
         int itemViewType = getItemViewType(listPosition);
         final TextView group = holder.group;
-
-
-
-
-//        holder.setTitle(items.get(position).getTitle());
 
         final CardView card = holder.card;
         final ImageView imageview_reorder = holder.imageview_reorder;
@@ -123,28 +112,5 @@ public class ApprovalAdapter extends RecyclerView.Adapter<ApprovalAdapter.MyView
         return docsData.size();
     }
 
-    @Override
-    public int getItemViewType(int position) {
-        return position;
-    }
 
-
-    public void setClickListener(OnItemClickListener itemClickListener) {
-        this.clickListener = itemClickListener;
-    }
-
-    public void setListItems(List<ApprovalModel> data) {
-        this.docsData = data;
-    }
-
-    public List getListItems() {
-        return docsData;
-    }
-    public ApprovalModel getItem(int position) {
-        return docsData.get(position);
-    }
-
-    public void setItem(ApprovalModel item, int position) {
-        docsData.set(position, item);
-    }
 }
