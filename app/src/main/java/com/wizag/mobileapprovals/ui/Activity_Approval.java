@@ -68,6 +68,7 @@ public class Activity_Approval extends AppCompatActivity {
         ItemTouchHelper touchHelper = new ItemTouchHelper(swipeAndDragHelper);
         approval_adapter.setTouchHelper(touchHelper);
         recyclerView.setAdapter(approval_adapter);
+      
         touchHelper.attachToRecyclerView(recyclerView);
 
 
@@ -95,10 +96,6 @@ public class Activity_Approval extends AppCompatActivity {
                     }
                     array.put(obj);
                     Log.d("approvals_details", array.toString());
-
-
-//                    myList.add(approvalModel.getGroupName());
-//                    JSONArray myListArray = new JSONArray(myList);
 
 
                 }

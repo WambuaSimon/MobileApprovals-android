@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">MobileApprovals</string>
     <string name="service_prompt">Select Approver</string>
+    <string name="connection">Ensure you have internet connection to continue</string>
+    <string name="retry">Retry</string>
+    <string name="error_occured">An Error Occured</string>
     <string-array name="service_arrays">
         <item>--Select First Approver--</item>
 

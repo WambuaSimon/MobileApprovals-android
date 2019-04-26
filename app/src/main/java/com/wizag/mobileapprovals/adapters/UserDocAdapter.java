@@ -25,6 +25,7 @@ public class UserDocAdapter extends RecyclerView.Adapter<UserDocAdapter.MyViewHo
 
     private List<UserDocsModel> docsData;
     Context context;
+    public UsersAdapterListener onClickListener;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -54,9 +55,11 @@ public class UserDocAdapter extends RecyclerView.Adapter<UserDocAdapter.MyViewHo
         }
     }
 
-    public UserDocAdapter(List<UserDocsModel> data, Context context) {
+    public UserDocAdapter(List<UserDocsModel> data, Context context, UsersAdapterListener listener) {
         this.docsData = data;
         this.context = context;
+        this.onClickListener = listener;
+
     }
 
     @Override
@@ -93,68 +96,75 @@ public class UserDocAdapter extends RecyclerView.Adapter<UserDocAdapter.MyViewHo
         approve.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
-                        context);
+                onClickListener.approveOnClick(v, listPosition);
 
-
-                alertDialog2.setTitle("Confirm Approval");
-
-
-                alertDialog2.setMessage("Are you sure you want to approve this document?");
-
-
-                alertDialog2.setPositiveButton("YES",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                // Write your code here to execute after dialog
-
-                            }
-                        });
-
-                alertDialog2.setNegativeButton("NO",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                // Write your code here to execute after dialog
-
-                                dialog.cancel();
-                            }
-                        });
-
-
-                alertDialog2.show();
+//
+//                final AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
+//                        context);
+//
+//
+//                alertDialog2.setTitle("Confirm Approval");
+//
+//
+//                alertDialog2.setMessage("Are you sure you want to approve this document?");
+//
+//
+//                alertDialog2.setPositiveButton("YES",
+//                        new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                // Write your code here to execute after dialog
+//                                docsData.remove(listPosition);
+//                                notifyDataSetChanged();
+//
+//                            }
+//                        });
+//
+//                alertDialog2.setNegativeButton("NO",
+//                        new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                // Write your code here to execute after dialog
+//
+//                                dialog.cancel();
+//                            }
+//                        });
+//
+//
+//                alertDialog2.show();
             }
         });
 
         reject.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final AlertDialog.Builder alert = new AlertDialog.Builder(
-                        context);
+                onClickListener.rejectOnClick(v, listPosition);
 
-                final EditText edittext = new EditText(context);
-                edittext.setPadding(7,7,7,7);
-
-//                alert.setMessage("Enter Your Message");
-                alert.setTitle("Reason for Rejecting");
-
-                alert.setView(edittext);
-
-                alert.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        //What ever you want to do with the value
-                        Editable YouEditTextValue = edittext.getText();
-                        //OR
-
-                    }
-                });
-
-                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        // what ever you want to do with No option.
-                    }
-                });
-
-                alert.show();
+//                final AlertDialog.Builder alert = new AlertDialog.Builder(
+//                        context);
+//
+//                final EditText edittext = new EditText(context);
+//                edittext.setPadding(7,7,7,7);
+//
+////                alert.setMessage("Enter Your Message");
+//                alert.setTitle("Reason for Rejecting");
+//
+//                alert.setView(edittext);
+//
+//                alert.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int whichButton) {
+//                        //What ever you want to do with the value
+//                        Editable YouEditTextValue = edittext.getText();
+//                        //OR
+//
+//                    }
+//                });
+//
+//                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int whichButton) {
+//                        // what ever you want to do with No option.
+//                    }
+//                });
+//
+//                alert.show();
 
             }
         });
@@ -168,4 +178,11 @@ public class UserDocAdapter extends RecyclerView.Adapter<UserDocAdapter.MyViewHo
     }
 
 
+    public interface UsersAdapterListener {
+
+        void approveOnClick(View v, int position);
+
+        void rejectOnClick(View v, int position);
+
+    }
 }
