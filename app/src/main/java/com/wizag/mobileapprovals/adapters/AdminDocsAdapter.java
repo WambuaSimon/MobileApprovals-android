@@ -61,18 +61,18 @@ public class AdminDocsAdapter extends RecyclerView.Adapter<AdminDocsAdapter.MyVi
 
     @Override
     public void onBindViewHolder(final MyViewHolder holder, final int listPosition) {
-        TextView doc_type = holder.doc_type;
+        final TextView doc_type = holder.doc_type;
         TextView doc_date = holder.doc_date;
         TextView doc_name = holder.doc_name;
         TextView account_name = holder.account_name;
         TextView exl_amt = holder.exl_amt;
         TextView incl_amt = holder.incl_amt;
         TextView vat = holder.vat;
-        TextView status = holder.status;
+        final TextView status = holder.status;
         FloatingActionButton fab = holder.fab;
 
 
-        doc_type.setText(docsData.get(listPosition).getDocType());
+   doc_type.setText(docsData.get(listPosition).getDocType());
         doc_date.setText(docsData.get(listPosition).getDocDate());
         doc_name.setText(docsData.get(listPosition).getDocName());
         account_name.setText(docsData.get(listPosition).getAccountName());
@@ -85,7 +85,11 @@ public class AdminDocsAdapter extends RecyclerView.Adapter<AdminDocsAdapter.MyVi
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                context.startActivity(new Intent(context, Activity_Approval.class));
+
+                Intent intent = new Intent (v.getContext(), Activity_Approval.class);
+                intent.putExtra("DocType",doc_type.getText().toString());
+                intent.putExtra("status",status.getText().toString());
+                context.startActivity(intent);
             }
         });
 

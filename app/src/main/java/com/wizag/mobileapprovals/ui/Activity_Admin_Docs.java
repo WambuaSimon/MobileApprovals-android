@@ -2,7 +2,10 @@ package com.wizag.mobileapprovals.ui;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.android.volley.*;
@@ -39,6 +43,8 @@ public class Activity_Admin_Docs extends AppCompatActivity {
 
     FloatingActionButton add_doc;
     SessionManager sessionManager;
+    String workflow = "";
+    LinearLayout parent_layout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +52,7 @@ public class Activity_Admin_Docs extends AppCompatActivity {
         setContentView(R.layout.activity_admin_docs);
         setTitle("Documents");
 
+        parent_layout = findViewById(R.id.parent_layout);
         add_doc = findViewById(R.id.add_doc);
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
@@ -70,7 +77,7 @@ public class Activity_Admin_Docs extends AppCompatActivity {
         pDialog.setMessage("Fetching Documents...");
         pDialog.setCancelable(false);
         pDialog.show();
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, "https://api.myjson.com/bins/x2uqg", new Response.Listener<String>() {
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, "http://approvals.wizag.biz/api/v1/documents", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
@@ -162,7 +169,21 @@ public class Activity_Admin_Docs extends AppCompatActivity {
 
         }) {
 
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                sessionManager = new SessionManager(getApplicationContext());
+                HashMap<String, String> user = sessionManager.getUserDetails();
+                String accessToken = user.get("token");
 
+                String bearer = "Bearer " + accessToken;
+                Map<String, String> headersSys = super.getHeaders();
+                Map<String, String> headers = new HashMap<String, String>();
+                headersSys.remove("Authorization");
+                headers.put("Authorization", bearer);
+                headers.putAll(headersSys);
+                return headers;
+            }
         };
 
 
@@ -215,5 +236,7 @@ public class Activity_Admin_Docs extends AppCompatActivity {
                 .setNegativeButton("No", null)
                 .show();
     }
+
+
 
 }

@@ -37,7 +37,8 @@ public class SessionManager {
     public static final String KEY_GROUPID = "GroupID";
     public static final String KEY_ISADMIN = "IsAdmin";
     public static final String KEY_ISACTIVE = "IsActive";
-    public static final String TOKEN = "access_token";
+    public static final String TOKEN = "token";
+    public static final String AGENT_ID = "AgentID";
 
 
     // Constructor
@@ -50,7 +51,7 @@ public class SessionManager {
     /**
      * Create login session
      */
-    public void createLoginSession(String AgentName, String GroupID, String IsActive,String token) {
+    public void createLoginSession(String AgentName, String GroupID, String IsActive,String token,String id) {
         // Storing login value as TRUE
         editor.putBoolean(IS_LOGIN, true);
 
@@ -59,6 +60,7 @@ public class SessionManager {
 
         // Storing email in prefs
         editor.putString(KEY_GROUPID, GroupID);
+        editor.putString(AGENT_ID, id);
 
         //storing access token
         // editor.putString(TOKEN, token);
@@ -102,6 +104,7 @@ public class SessionManager {
         user.put(KEY_NAME, prefs.getString(KEY_NAME, null));
         user.put(KEY_GROUPID, prefs.getString(KEY_GROUPID, null));
         user.put(KEY_ISADMIN, prefs.getString(KEY_ISADMIN, null));
+        user.put(AGENT_ID, prefs.getString(AGENT_ID, null));
         user.put(KEY_ISACTIVE, prefs.getString(KEY_ISACTIVE, null));
         user.put(TOKEN, prefs.getString(TOKEN, null));
 

@@ -56,31 +56,16 @@ public class Activity_Login extends AppCompatActivity {
         parent_layout = findViewById(R.id.parent_layout);
         sessionManager = new SessionManager(getApplicationContext());
 
-//        HashMap<String, String> user = sessionManager.getUserDetails();
-//        String isAdmin = user.get("IsAdmin");
-//
-//        Toast.makeText(this, isAdmin, Toast.LENGTH_SHORT).show();
-//
-//        if (sessionManager.isLoggedIn() && isAdmin.equalsIgnoreCase("1")) {
-//            startActivity(new Intent(getApplicationContext(), Activity_Admin_Docs.class));
-//            finish();
-//        }
-//
-//        else if (sessionManager.isLoggedIn() && isAdmin.equalsIgnoreCase("0")) {
-//            startActivity(new Intent(getApplicationContext(), Activity_UserDocuments.class));
-//            finish();
-//        }
-
         SharedPreferences sp = getSharedPreferences("login", MODE_PRIVATE);
         if (sp != null) {
             String IsAdmin = sp.getString("IsAdmin", null);
-            Toast.makeText(this, IsAdmin, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, IsAdmin, Toast.LENGTH_SHORT).show();
 
 
-            if (sessionManager.isLoggedIn() && IsAdmin.equalsIgnoreCase("1")) {
+            if (sessionManager.isLoggedIn() && IsAdmin!=null && IsAdmin.equalsIgnoreCase("1")) {
                 startActivity(new Intent(getApplicationContext(), Activity_Admin_Docs.class));
                 finish();
-            } else if (sessionManager.isLoggedIn() && IsAdmin.equalsIgnoreCase("0")) {
+            } else if (sessionManager.isLoggedIn() && IsAdmin!=null && IsAdmin.equalsIgnoreCase("0")) {
                 startActivity(new Intent(getApplicationContext(), Activity_UserDocuments.class));
                 finish();
             }
@@ -140,12 +125,14 @@ public class Activity_Login extends AppCompatActivity {
                             String GroupID = jsonObject.getString("GroupID");
                             String IsActive = jsonObject.getString("IsActive");
                             String IsAdmin = jsonObject.getString("IsAdmin");
+                            String id = jsonObject.getString("AgentID");
 
                             if (IsAdmin.equalsIgnoreCase("0")) {
                                 sessionManager.createLoginSession(Agentname,
                                         GroupID,
                                         IsActive,
-                                        token);
+                                        token,
+                                        id);
 
                                 SharedPreferences login = getSharedPreferences(SHARED_PREF_NAME, MODE_PRIVATE);
                                 SharedPreferences.Editor editor = login.edit();
@@ -160,7 +147,8 @@ public class Activity_Login extends AppCompatActivity {
                                 sessionManager.createLoginSession(Agentname,
                                         GroupID,
                                         IsActive,
-                                        token);
+                                        token,
+                                        id);
 
                                 SharedPreferences login = getSharedPreferences(SHARED_PREF_NAME, MODE_PRIVATE);
                                 SharedPreferences.Editor editor = login.edit();
@@ -172,8 +160,10 @@ public class Activity_Login extends AppCompatActivity {
 
                                 startActivity(new Intent(getApplicationContext(), Activity_Admin_Docs.class));
                                 finish();
-                            }
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Check Credentials and try again", Toast.LENGTH_LONG);
 
+                            }
 
                         } catch (JSONException e1) {
                             e1.printStackTrace();
@@ -186,6 +176,7 @@ public class Activity_Login extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 error.printStackTrace();
+                Toast.makeText(Activity_Login.this, error.getMessage(), Toast.LENGTH_SHORT).show();
                 Snackbar.make(parent_layout, R.string.error_occured, Snackbar.LENGTH_LONG)
                         .setAction(R.string.retry, new View.OnClickListener() {
                             @Override

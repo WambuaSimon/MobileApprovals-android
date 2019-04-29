@@ -1,21 +1,26 @@
 package com.wizag.mobileapprovals.ui;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
-import android.support.design.widget.FloatingActionButton;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.android.volley.*;
+import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.wizag.mobileapprovals.R;
@@ -39,6 +44,9 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
     UserDocAdapter userDocsAdapter;
     List<UserDocsModel> docsModelList;
     SessionManager sessionManager;
+    Context context;
+    String doc_id;
+    String reason;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,18 +54,23 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
         setContentView(R.layout.activity_admin_docs);
         setTitle("Documents");
 
+        context = this;
+
         sessionManager = new SessionManager(getApplicationContext());
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         docsModelList = new ArrayList<>();
 
+        loadDocuments();
         //initializing adapter
         userDocsAdapter = new UserDocAdapter(docsModelList, this, new UserDocAdapter.UsersAdapterListener() {
             @Override
             public void approveOnClick(View v, int position) {
+
+
                 final AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
-                        Activity_UserDocuments.this);
+                        context);
 
 
                 alertDialog2.setTitle("Confirm Approval");
@@ -70,7 +83,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 // Write your code here to execute after dialog
-//                                Toast.makeText(Activity_UserDocuments.this, , Toast.LENGTH_SHORT).show();
+                                approve();
 
                             }
                         });
@@ -92,7 +105,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
             @Override
             public void rejectOnClick(View v, int position) {
                 final AlertDialog.Builder alert = new AlertDialog.Builder(
-                        Activity_UserDocuments.this);
+                        context);
 
                 final EditText edittext = new EditText(getApplicationContext());
                 edittext.setPadding(7, 7, 7, 7);
@@ -104,10 +117,13 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
                 alert.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        //What ever you want to do with the value
-                        Editable YouEditTextValue = edittext.getText();
-                        //OR
+                        reason = edittext.getText().toString();
+                        if (reason.isEmpty()) {
+                            edittext.setError("Enter Reason to proceed");
+                        } else {
 
+                            reject();
+                        }
                     }
                 });
 
@@ -120,11 +136,9 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                 alert.show();
             }
         });
+
+
         recyclerView.setAdapter(userDocsAdapter);
-        /*ADD DOC APPROVAL W/F*/
-
-
-        loadDocuments();
 
 
     }
@@ -135,7 +149,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
         pDialog.setMessage("Fetching Documents...");
         pDialog.setCancelable(false);
         pDialog.show();
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, "https://api.myjson.com/bins/x2uqg", new Response.Listener<String>() {
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, "http://approvals.wizag.biz/api/v1/documents", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
@@ -150,7 +164,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                             JSONObject docsObject = docs.getJSONObject(k);
 
 
-                            String doc_id = docsObject.getString("id");
+                            doc_id = docsObject.getString("id");
                             String DocType = docsObject.getString("DocType");
                             String DocName = docsObject.getString("DocName");
                             String AccountName = docsObject.getString("AccountName");
@@ -227,7 +241,21 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
         }) {
 
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                SessionManager sessionManager = new SessionManager(getApplicationContext());
+                HashMap<String, String> user = sessionManager.getUserDetails();
+                String accessToken = user.get("token");
+                String bearer = "Bearer " + accessToken;
+                Map<String, String> headersSys = super.getHeaders();
+                Map<String, String> headers = new HashMap<String, String>();
+                headersSys.remove("Authorization");
+                headers.put("Authorization", bearer);
 
+                headers.putAll(headersSys);
+                return headers;
+            }
         };
 
 
@@ -283,7 +311,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                 .setCancelable(false)
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                      finish();
+                        finish();
 
                     }
                 })
@@ -291,4 +319,168 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                 .show();
     }
 
+
+    private void approve() {
+        com.android.volley.RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+        final ProgressDialog pDialog = new ProgressDialog(this);
+        pDialog.setMessage("Loading...");
+        pDialog.setCancelable(false);
+        pDialog.show();
+
+        // Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.PUT, "http://approvals.wizag.biz/api/v1/documents/" + doc_id,
+                new com.android.volley.Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            //check status if success login user
+                            JSONObject jsonObject = new JSONObject(response);
+                            pDialog.dismiss();
+                            String success = jsonObject.getString("success");
+                            String message = jsonObject.getString("message");
+
+
+                            if (success == "true") {
+                                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Error in updating document", Toast.LENGTH_LONG).show();
+
+                            }
+
+
+                        } catch (JSONException e1) {
+                            e1.printStackTrace();
+                        }
+
+
+                        //Toast.makeText(Activity_Buy.this, "", Toast.LENGTH_SHORT).show();
+                    }
+                }, new com.android.volley.Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+                Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+
+
+                pDialog.dismiss();
+            }
+        }) {
+            //adding parameters to the request
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("AppStatus", "1");
+//                params.put("RejectionReason", array.toString());
+
+
+                return params;
+
+
+            }
+
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                SessionManager sessionManager = new SessionManager(getApplicationContext());
+                HashMap<String, String> user = sessionManager.getUserDetails();
+                String accessToken = user.get("token");
+                String bearer = "Bearer " + accessToken;
+                Map<String, String> headersSys = super.getHeaders();
+                Map<String, String> headers = new HashMap<String, String>();
+                headersSys.remove("Authorization");
+                headers.put("Authorization", bearer);
+
+                headers.putAll(headersSys);
+                return headers;
+            }
+
+
+        };
+// Add the request to the RequestQueue.
+        queue.add(stringRequest);
+
+    }
+
+    private void reject() {
+        com.android.volley.RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+        final ProgressDialog pDialog = new ProgressDialog(this);
+        pDialog.setMessage("Loading...");
+        pDialog.setCancelable(false);
+        pDialog.show();
+
+        // Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.PUT, "http://approvals.wizag.biz/api/v1/documents/" + doc_id,
+                new com.android.volley.Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            //check status if success login user
+                            JSONObject jsonObject = new JSONObject(response);
+                            pDialog.dismiss();
+                            String success = jsonObject.getString("success");
+                            String message = jsonObject.getString("message");
+
+
+                            if (success == "true") {
+                                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Error in updating document", Toast.LENGTH_LONG).show();
+
+                            }
+
+
+                        } catch (JSONException e1) {
+                            e1.printStackTrace();
+                        }
+
+
+                        //Toast.makeText(Activity_Buy.this, "", Toast.LENGTH_SHORT).show();
+                    }
+                }, new com.android.volley.Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+                Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+
+
+                pDialog.dismiss();
+            }
+        }) {
+            //adding parameters to the request
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("AppStatus", "0");
+                params.put("RejectionReason", reason);
+                return params;
+
+
+            }
+
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                SessionManager sessionManager = new SessionManager(getApplicationContext());
+                HashMap<String, String> user = sessionManager.getUserDetails();
+                String accessToken = user.get("token");
+                String bearer = "Bearer " + accessToken;
+                Map<String, String> headersSys = super.getHeaders();
+                Map<String, String> headers = new HashMap<String, String>();
+                headersSys.remove("Authorization");
+                headers.put("Authorization", bearer);
+
+                headers.putAll(headersSys);
+                return headers;
+            }
+
+
+        };
+// Add the request to the RequestQueue.
+        queue.add(stringRequest);
+
+    }
 }
