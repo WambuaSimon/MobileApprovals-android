@@ -47,10 +47,11 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
     List<UserDocsModel> docsModelList;
     SessionManager sessionManager;
     Context context;
-    String doc_id;
+    String DocType;
     String reason;
     TextView empty_view;
     String groupID;
+    String id_to_update;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +87,8 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
         userDocsAdapter = new UserDocAdapter(docsModelList, this, new UserDocAdapter.UsersAdapterListener() {
             @Override
             public void approveOnClick(View v, int position) {
+                id_to_update = docsModelList.get(position).DocType;
+
 
 
                 final AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
@@ -123,6 +126,9 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
             @Override
             public void rejectOnClick(View v, int position) {
+                id_to_update = docsModelList.get(position).DocType;
+
+
                 final AlertDialog.Builder alert = new AlertDialog.Builder(
                         context);
 
@@ -194,7 +200,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                                     JSONObject sequenceObject = sequenceID.getJSONObject(p);
                                     String seq_id = sequenceObject.getString("id");
 
-                                    if(seq_id.contains(groupID)){
+                                    if (seq_id.contains(groupID)) {
 
 
                                         JSONObject singleDoc = docsObject.getJSONObject("document");
@@ -202,8 +208,8 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                                         if (singleDoc != null) {
 
                                             /*Load Documents*/
-//                                    doc_id = docsObject.getString("id");
-                                            String DocType = singleDoc.getString("DocType");
+
+                                            DocType = singleDoc.getString("DocType");
                                             String DocName = singleDoc.getString("DocName");
                                             String AccountName = singleDoc.getString("AccountName");
                                             String DocDate = singleDoc.getString("DocDate");
@@ -252,6 +258,8 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                                             model_docs.setInclAmt("Incl:\t" + InclAmt);
                                             model_docs.setAppStatus(AppStatus);
 
+                                            Log.d("DocType", DocType);
+
                                             docsModelList.add(model_docs);
 
 
@@ -261,7 +269,6 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
 
                                 }
-
 
 
                             }
@@ -372,7 +379,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
         pDialog.show();
 
         // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.PUT, "http://approvals.wizag.biz/api/v1/documents/" + doc_id,
+        StringRequest stringRequest = new StringRequest(Request.Method.PUT, "http://approvals.wizag.biz/api/v1/documents/" + id_to_update,
                 new com.android.volley.Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -453,7 +460,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
         pDialog.show();
 
         // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.PUT, "http://approvals.wizag.biz/api/v1/documents/" + doc_id,
+        StringRequest stringRequest = new StringRequest(Request.Method.PUT, "http://approvals.wizag.biz/api/v1/documents/" + id_to_update,
                 new com.android.volley.Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
