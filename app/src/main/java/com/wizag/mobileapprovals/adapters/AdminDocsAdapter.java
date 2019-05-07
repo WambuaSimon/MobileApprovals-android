@@ -19,6 +19,7 @@ public class AdminDocsAdapter extends RecyclerView.Adapter<AdminDocsAdapter.MyVi
 
     private List<AdminDocsModel> docsData;
     Context context;
+    public AdminDocsAdapterListener onClickListener;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -31,6 +32,7 @@ public class AdminDocsAdapter extends RecyclerView.Adapter<AdminDocsAdapter.MyVi
         TextView vat;
         TextView status;
         FloatingActionButton fab;
+        TextView statusDesc;
 
         public MyViewHolder(View itemView) {
             super(itemView);
@@ -43,12 +45,15 @@ public class AdminDocsAdapter extends RecyclerView.Adapter<AdminDocsAdapter.MyVi
             this.vat = itemView.findViewById(R.id.vat);
             this.status = itemView.findViewById(R.id.status);
             this.fab = itemView.findViewById(R.id.add_doc);
+
         }
     }
 
-    public AdminDocsAdapter(List<AdminDocsModel> data, Context context) {
+    public AdminDocsAdapter(List<AdminDocsModel> data, Context context, AdminDocsAdapterListener listener) {
         this.docsData = data;
         this.context = context;
+        this.onClickListener = listener;
+
     }
 
     @Override
@@ -72,24 +77,21 @@ public class AdminDocsAdapter extends RecyclerView.Adapter<AdminDocsAdapter.MyVi
         FloatingActionButton fab = holder.fab;
 
 
-   doc_type.setText(docsData.get(listPosition).getDocType());
+        doc_type.setText(docsData.get(listPosition).getDocType());
         doc_date.setText(docsData.get(listPosition).getDocDate());
         doc_name.setText(docsData.get(listPosition).getDocName());
         account_name.setText(docsData.get(listPosition).getAccountName());
-        
+
         exl_amt.setText(docsData.get(listPosition).getExclAmt());
         incl_amt.setText(docsData.get(listPosition).getInclAmt());
         vat.setText(docsData.get(listPosition).getVATAmt());
         status.setText(docsData.get(listPosition).getAppStatus());
-
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                onClickListener.fabOnClick(v, listPosition);
 
-                Intent intent = new Intent (v.getContext(), Activity_Approval.class);
-                intent.putExtra("DocType",doc_type.getText().toString());
-                intent.putExtra("status",status.getText().toString());
-                context.startActivity(intent);
+
             }
         });
 
@@ -101,5 +103,11 @@ public class AdminDocsAdapter extends RecyclerView.Adapter<AdminDocsAdapter.MyVi
         return docsData.size();
     }
 
+    public interface AdminDocsAdapterListener {
+
+        void fabOnClick(View v, int position);
+
+
+    }
 
 }

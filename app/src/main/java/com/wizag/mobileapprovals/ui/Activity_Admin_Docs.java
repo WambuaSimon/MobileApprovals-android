@@ -3,12 +3,10 @@ package com.wizag.mobileapprovals.ui;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,7 +16,13 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.android.volley.*;
+import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.wizag.mobileapprovals.R;
@@ -50,7 +54,7 @@ public class Activity_Admin_Docs extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_docs);
-        setTitle("Documents");
+        setTitle("Admin Documents");
 
         parent_layout = findViewById(R.id.parent_layout);
         add_doc = findViewById(R.id.add_doc);
@@ -59,16 +63,35 @@ public class Activity_Admin_Docs extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
         docsModelList = new ArrayList<>();
-
+        loadDocuments();
         //initializing adapter
-        adminDocsAdapter = new AdminDocsAdapter(docsModelList, this);
+        adminDocsAdapter = new AdminDocsAdapter(docsModelList, this, new AdminDocsAdapter.AdminDocsAdapterListener() {
+            @Override
+            public void fabOnClick(View v, int position) {
+                Intent intent = new Intent(getApplicationContext(), Activity_Approval.class);
+                AdminDocsModel adminDocsModel = docsModelList.get(position);
+                String docType = adminDocsModel.getDocType();
+                String appStatus = adminDocsModel.getAppStatus();
+
+                intent.putExtra("DocType",docType);
+                intent.putExtra("AppStatus",appStatus);
+
+                startActivity(intent);
+
+
+            }
+
+        });
+
+
         recyclerView.setAdapter(adminDocsAdapter);
         adminDocsAdapter.notifyDataSetChanged();
+
         /*ADD DOC APPROVAL W/F*/
 
         sessionManager = new SessionManager(getApplicationContext());
 
-        loadDocuments();
+
     }
 
     private void loadDocuments() {
@@ -87,12 +110,14 @@ public class Activity_Admin_Docs extends AppCompatActivity {
                     if (jsonObject != null) {
                         String message = jsonObject.getString("message");
                         JSONArray docs = jsonObject.getJSONArray("documents");
+                        docsModelList.clear();
                         for (int k = 0; k < docs.length(); k++) {
+//                            docsModelList.clear();
                             AdminDocsModel model_docs = new AdminDocsModel();
                             JSONObject docsObject = docs.getJSONObject(k);
 
 
-                            String doc_id = docsObject.getString("id");
+//                            String doc_id = docsObject.getString("id");
                             String DocType = docsObject.getString("DocType");
                             String DocName = docsObject.getString("DocName");
                             String AccountName = docsObject.getString("AccountName");
@@ -104,31 +129,31 @@ public class Activity_Admin_Docs extends AppCompatActivity {
 
 
                             if (DocType.equalsIgnoreCase("1")) {
-                                DocType = "Invoice";
+                                DocName = "Invoice";
                             } else if (DocType.equalsIgnoreCase("2")) {
-                                DocType = "PO";
+                                DocName = "PO";
                             } else if (DocType.equalsIgnoreCase("3")) {
-                                DocType = "Credit Note";
+                                DocName = "Credit Note";
                             } else if (DocType.equalsIgnoreCase("4")) {
-                                DocType = "PO";
+                                DocName = "PO";
                             } else if (DocType.equalsIgnoreCase("5")) {
-                                DocType = "Receipt";
+                                DocName = "Receipt";
                             } else if (DocType.equalsIgnoreCase("6")) {
-                                DocType = "Cash Memo";
+                                DocName = "Cash Memo";
                             } else if (DocType.equalsIgnoreCase("7")) {
-                                DocType = "Supplier Note";
+                                DocName = "Supplier Note";
                             }
 
-                            /*DOC STATUS*/
-                            if (AppStatus.equalsIgnoreCase("1")) {
-                                AppStatus = "Not Approved";
-                            } else if (AppStatus.equalsIgnoreCase("2")) {
-                                AppStatus = "Partially Approved";
-                            } else if (AppStatus.equalsIgnoreCase("3")) {
-                                AppStatus = "Approved";
-                            } else if (AppStatus.equalsIgnoreCase("4")) {
-                                AppStatus = "Rejected";
-                            }
+//                            /*DOC STATUS*/
+//                            if (AppStatus.equalsIgnoreCase("1")) {
+//                                AppStatus = "Not Approved";
+//                            } else if (AppStatus.equalsIgnoreCase("2")) {
+//                                AppStatus = "Partially Approved";
+//                            } else if (AppStatus.equalsIgnoreCase("3")) {
+//                                AppStatus = "Approved";
+//                            } else if (AppStatus.equalsIgnoreCase("4")) {
+//                                AppStatus = "Rejected";
+//                            }
 
 
                             model_docs.setDocType(DocType);
@@ -139,13 +164,9 @@ public class Activity_Admin_Docs extends AppCompatActivity {
                             model_docs.setVATAmt("Vat:\t" + VATAmt);
                             model_docs.setInclAmt("Incl:\t" + InclAmt);
                             model_docs.setAppStatus(AppStatus);
+                            docsModelList.add(model_docs);
 
 
-                            if (docsModelList.contains(DocType)) {
-                                /*do nothing*/
-                            } else {
-                                docsModelList.add(model_docs);
-                            }
                         }
 
 
@@ -236,7 +257,6 @@ public class Activity_Admin_Docs extends AppCompatActivity {
                 .setNegativeButton("No", null)
                 .show();
     }
-
 
 
 }

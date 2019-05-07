@@ -9,6 +9,7 @@ public class AdminDocsModel {
     public String ExclAmt;
     public String VATAmt;
     public String InclAmt;
+    public String StatusDescription;
 
     public String getDocType() {
         return DocType;
@@ -72,5 +73,13 @@ public class AdminDocsModel {
 
     public void setInclAmt(String inclAmt) {
         InclAmt = inclAmt;
+    }
+
+    public String getStatusDescription() {
+        return StatusDescription;
+    }
+
+    public void setStatusDescription(String statusDescription) {
+        StatusDescription = statusDescription;
     }
 }

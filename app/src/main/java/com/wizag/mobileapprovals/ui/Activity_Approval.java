@@ -1,21 +1,16 @@
 package com.wizag.mobileapprovals.ui;
 
-import android.app.Activity;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -85,7 +80,10 @@ public class Activity_Approval extends AppCompatActivity {
 
         Intent intent = getIntent();
         docType = intent.getStringExtra("DocType");
-        status = intent.getStringExtra("status");
+        status = intent.getStringExtra("AppStatus");
+
+        Log.d("DocType", docType);
+        Log.d("AppStatus", status);
 
 
         loadDocuments();
@@ -99,7 +97,6 @@ public class Activity_Approval extends AppCompatActivity {
                     JSONObject obj = new JSONObject();
                     final ApprovalModel approvalModel = approval_model.get(i);
 
-                    String data;
                     myList = new ArrayList<String>();
                     myList.add(approvalModel.getGroupID());
 
@@ -121,6 +118,16 @@ public class Activity_Approval extends AppCompatActivity {
         });
     }
 
+    public boolean isExist(String strNama) {
+        for (int i = 0; i < approval_model.size(); i++) {
+            if (approval_model.get(i).equals(strNama)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private void loadDocuments() {
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
         final ProgressDialog pDialog = new ProgressDialog(this);
@@ -137,8 +144,9 @@ public class Activity_Approval extends AppCompatActivity {
                     if (jsonObject != null) {
                         String message = jsonObject.getString("message");
                         docs = jsonObject.getJSONArray("groups");
-
+                        approval_model.clear();
                         for (int k = 0; k < docs.length(); k++) {
+
                             approvals = new ApprovalModel();
                             JSONObject docsObject = docs.getJSONObject(k);
 
@@ -146,6 +154,8 @@ public class Activity_Approval extends AppCompatActivity {
                             grpID = docsObject.getString("GroupID");
                             grpName = docsObject.getString("GroupName");
 
+
+                            boolean isExist = isExist(docsObject.getString("GroupName"));
 
                             if (grpID.equalsIgnoreCase("1")) {
                                 grpName = "Accounting and Finance";
@@ -161,18 +171,11 @@ public class Activity_Approval extends AppCompatActivity {
                                 grpName = "Manager";
                             }
 
+
                             approvals.setGroupName(grpName);
                             approvals.setGroupID(grpID);
+                            approval_model.add(approvals);
 
-
-                            if (approval_model.equals(grpID)) {
-
-
-                            } else {
-                                approval_model.add(approvals);
-
-
-                            }
 
                         }
 
@@ -226,6 +229,7 @@ public class Activity_Approval extends AppCompatActivity {
 
     }
 
+
     private void postWorkflow() {
         SessionManager sessionManager = new SessionManager(getApplicationContext());
         HashMap<String, String> user = sessionManager.getUserDetails();
@@ -249,10 +253,9 @@ public class Activity_Approval extends AppCompatActivity {
                             String success = jsonObject.getString("Success");
                             String message = jsonObject.getString("message");
 
-                            Toast.makeText(Activity_Approval.this, message, Toast.LENGTH_LONG).show();
                             if (success == "true") {
                                 Toast.makeText(Activity_Approval.this, message, Toast.LENGTH_LONG).show();
-                                startActivity(new Intent(getApplicationContext(),Activity_Admin_Docs.class));
+                                startActivity(new Intent(getApplicationContext(), Activity_Admin_Docs.class));
                                 finish();
                             } else {
                                 Toast.makeText(Activity_Approval.this, "Error in creating workflow", Toast.LENGTH_LONG).show();
@@ -280,21 +283,17 @@ public class Activity_Approval extends AppCompatActivity {
             //adding parameters to the request
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
+
                 Map<String, String> params = new HashMap<>();
                 params.put("DocType", docType);
                 params.put("SequenceID", array.toString());
                 params.put("GroupID", grp_id);
                 params.put("AgentID", agent_id);
                 params.put("IsApproved", status);
-
-//                Log.d("DocType",docType);
-//                Log.d("SequenceID",array.toString());
-//                Log.d("GroupID",grp_id);
-//                Log.d("AgentID",agent_id);
-//                Log.d("IsApproved",status);
-
+                Log.d("SequenceIDString", array.toString());
                 return params;
 
+//                "\"[{\"id\":\"1\"},{\"id\":\"2\"},{\"id\":\"3\"},{\"id\":\"4\"},{\"id\":\"5\"},{\"id\":\"6\"}]\""
 
             }
 
@@ -310,7 +309,6 @@ public class Activity_Approval extends AppCompatActivity {
                 Map<String, String> headers = new HashMap<String, String>();
                 headersSys.remove("Authorization");
                 headers.put("Authorization", bearer);
-
                 headers.putAll(headersSys);
                 return headers;
             }
@@ -321,6 +319,7 @@ public class Activity_Approval extends AppCompatActivity {
         queue.add(stringRequest);
 
     }
+
 
 }
 

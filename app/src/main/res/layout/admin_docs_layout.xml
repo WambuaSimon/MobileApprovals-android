@@ -28,11 +28,11 @@
             android:weightSum="1">
 
             <TextView
-                android:id="@+id/doc_type"
+                android:id="@+id/doc_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
-                android:text="DocType"
+                android:text="DocName"
                 android:textColor="@android:color/black"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -65,7 +65,7 @@
 
 
         <TextView
-            android:id="@+id/doc_name"
+            android:id="@+id/doc_type"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="DocName"
@@ -121,7 +121,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-
             android:visibility="gone"
             android:weightSum="1">
 

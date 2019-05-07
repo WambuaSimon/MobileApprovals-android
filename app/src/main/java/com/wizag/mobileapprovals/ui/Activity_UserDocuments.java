@@ -8,10 +8,12 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -47,22 +49,39 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
     Context context;
     String doc_id;
     String reason;
+    TextView empty_view;
+    String groupID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_admin_docs);
+        setContentView(R.layout.activity_user_documents);
         setTitle("Documents");
-
+        sessionManager = new SessionManager(getApplicationContext());
         context = this;
 
+        empty_view = findViewById(R.id.empty_view);
         sessionManager = new SessionManager(getApplicationContext());
+        HashMap<String, String> user = sessionManager.getUserDetails();
+        groupID = user.get("GroupID");
         recyclerView = findViewById(R.id.recyclerView);
+
+
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         docsModelList = new ArrayList<>();
 
         loadDocuments();
+
+//        if (docsModelList.isEmpty()) {
+//            recyclerView.setVisibility(View.GONE);
+//            empty_view.setVisibility(View.VISIBLE);
+//        } else {
+//            recyclerView.setVisibility(View.VISIBLE);
+//            empty_view.setVisibility(View.GONE);
+//        }
+
+
         //initializing adapter
         userDocsAdapter = new UserDocAdapter(docsModelList, this, new UserDocAdapter.UsersAdapterListener() {
             @Override
@@ -139,7 +158,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
 
         recyclerView.setAdapter(userDocsAdapter);
-
+//        userDocsAdapter.notifyDataSetChanged();
 
     }
 
@@ -149,7 +168,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
         pDialog.setMessage("Fetching Documents...");
         pDialog.setCancelable(false);
         pDialog.show();
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, "http://approvals.wizag.biz/api/v1/documents", new Response.Listener<String>() {
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, "http://approvals.wizag.biz/api/v1/groupDocs", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
@@ -157,70 +176,96 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                     JSONObject jsonObject = new JSONObject(response);
                     pDialog.dismiss();
                     if (jsonObject != null) {
+
+                        String success = jsonObject.getString("success");
                         String message = jsonObject.getString("message");
-                        JSONArray docs = jsonObject.getJSONArray("documents");
-                        for (int k = 0; k < docs.length(); k++) {
-                            UserDocsModel model_docs = new UserDocsModel();
-                            JSONObject docsObject = docs.getJSONObject(k);
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+
+                        JSONArray documents = jsonObject.getJSONArray("documents");
+
+                        if (success.equalsIgnoreCase("true")) {
+                            docsModelList.clear();
+                            for (int k = 0; k < documents.length(); k++) {
+
+                                UserDocsModel model_docs = new UserDocsModel();
+                                JSONObject docsObject = documents.getJSONObject(k);
+                                JSONArray sequenceID = docsObject.getJSONArray("SequenceID");
+                                for (int p = 0; p < sequenceID.length(); p++) {
+                                    JSONObject sequenceObject = sequenceID.getJSONObject(p);
+                                    String seq_id = sequenceObject.getString("id");
+
+                                    if(seq_id.contains(groupID)){
 
 
-                            doc_id = docsObject.getString("id");
-                            String DocType = docsObject.getString("DocType");
-                            String DocName = docsObject.getString("DocName");
-                            String AccountName = docsObject.getString("AccountName");
-                            String DocDate = docsObject.getString("DocDate");
-                            String ExclAmt = docsObject.getString("ExclAmt");
-                            String VATAmt = docsObject.getString("VATAmt");
-                            String InclAmt = docsObject.getString("InclAmt");
-                            String AppStatus = docsObject.getString("AppStatus");
+                                        JSONObject singleDoc = docsObject.getJSONObject("document");
+
+                                        if (singleDoc != null) {
+
+                                            /*Load Documents*/
+//                                    doc_id = docsObject.getString("id");
+                                            String DocType = singleDoc.getString("DocType");
+                                            String DocName = singleDoc.getString("DocName");
+                                            String AccountName = singleDoc.getString("AccountName");
+                                            String DocDate = singleDoc.getString("DocDate");
+                                            String ExclAmt = singleDoc.getString("ExclAmt");
+                                            String VATAmt = singleDoc.getString("VATAmt");
+                                            String InclAmt = singleDoc.getString("InclAmt");
+                                            String AppStatus = singleDoc.getString("AppStatus");
 
 
-                            if (DocType.equalsIgnoreCase("1")) {
-                                DocType = "Invoice";
-                            } else if (DocType.equalsIgnoreCase("2")) {
-                                DocType = "PO";
-                            } else if (DocType.equalsIgnoreCase("3")) {
-                                DocType = "Credit Note";
-                            } else if (DocType.equalsIgnoreCase("4")) {
-                                DocType = "PO";
-                            } else if (DocType.equalsIgnoreCase("5")) {
-                                DocType = "Receipt";
-                            } else if (DocType.equalsIgnoreCase("6")) {
-                                DocType = "Cash Memo";
-                            } else if (DocType.equalsIgnoreCase("7")) {
-                                DocType = "Supplier Note";
-                            }
+                                            if (DocType.equalsIgnoreCase("1")) {
+                                                DocName = "Invoice";
+                                            } else if (DocType.equalsIgnoreCase("2")) {
+                                                DocName = "PO";
+                                            } else if (DocType.equalsIgnoreCase("3")) {
+                                                DocName = "Credit Note";
+                                            } else if (DocType.equalsIgnoreCase("4")) {
+                                                DocName = "PO";
+                                            } else if (DocType.equalsIgnoreCase("5")) {
+                                                DocName = "Receipt";
+                                            } else if (DocType.equalsIgnoreCase("6")) {
+                                                DocType = "Cash Memo";
+                                            } else if (DocType.equalsIgnoreCase("7")) {
+                                                DocName = "Supplier Note";
+                                            } else {
+                                                DocName = "Cheque";
+                                            }
 
-                            /*DOC STATUS*/
-                            if (AppStatus.equalsIgnoreCase("1")) {
-                                AppStatus = "Not Approved";
-                            } else if (AppStatus.equalsIgnoreCase("2")) {
-                                AppStatus = "Partially Approved";
-                            } else if (AppStatus.equalsIgnoreCase("3")) {
-                                AppStatus = "Approved";
-                            } else if (AppStatus.equalsIgnoreCase("4")) {
-                                AppStatus = "Rejected";
-                            }
-
-
-                            model_docs.setDocType(DocType);
-                            model_docs.setDocName(DocName);
-                            model_docs.setAccountName(AccountName);
-                            model_docs.setDocDate(DocDate);
-                            model_docs.setExclAmt("Excl:\t" + ExclAmt);
-                            model_docs.setVATAmt("Vat:\t" + VATAmt);
-                            model_docs.setInclAmt("Incl:\t" + InclAmt);
-                            model_docs.setAppStatus(AppStatus);
+                                            /*DOC STATUS*/
+//                                    if (AppStatus.equalsIgnoreCase("1")) {
+//                                        AppStatus = "Not Approved";
+//                                    } else if (AppStatus.equalsIgnoreCase("2")) {
+//                                        AppStatus = "Partially Approved";
+//                                    } else if (AppStatus.equalsIgnoreCase("3")) {
+//                                        AppStatus = "Approved";
+//                                    } else if (AppStatus.equalsIgnoreCase("4")) {
+//                                        AppStatus = "Rejected";
+//                                    }
 
 
-                            if (docsModelList.contains(doc_id)) {
-                                /*do nothing*/
-                            } else {
-                                docsModelList.add(model_docs);
+                                            model_docs.setDocType(DocType);
+                                            model_docs.setDocName(DocName);
+                                            model_docs.setAccountName(AccountName);
+                                            model_docs.setDocDate(DocDate);
+                                            model_docs.setExclAmt("Excl:\t" + ExclAmt);
+                                            model_docs.setVATAmt("Vat:\t" + VATAmt);
+                                            model_docs.setInclAmt("Incl:\t" + InclAmt);
+                                            model_docs.setAppStatus(AppStatus);
+
+                                            docsModelList.add(model_docs);
+
+
+                                        }
+
+                                    }
+
+
+                                }
+
+
+
                             }
                         }
-
-
                     }
 
 
@@ -252,7 +297,6 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                 Map<String, String> headers = new HashMap<String, String>();
                 headersSys.remove("Authorization");
                 headers.put("Authorization", bearer);
-
                 headers.putAll(headersSys);
                 return headers;
             }
@@ -371,9 +415,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
                 params.put("AppStatus", "1");
-//                params.put("RejectionReason", array.toString());
-
-
+                params.put("RejectionReason", "");
                 return params;
 
 
@@ -464,7 +506,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>();
-                SessionManager sessionManager = new SessionManager(getApplicationContext());
+
                 HashMap<String, String> user = sessionManager.getUserDetails();
                 String accessToken = user.get("token");
                 String bearer = "Bearer " + accessToken;

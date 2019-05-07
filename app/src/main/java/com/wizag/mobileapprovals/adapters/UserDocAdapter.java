@@ -1,23 +1,15 @@
 package com.wizag.mobileapprovals.adapters;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.wizag.mobileapprovals.R;
 import com.wizag.mobileapprovals.models.UserDocsModel;
-import com.wizag.mobileapprovals.ui.Activity_Approval;
 
 import java.util.List;
 
@@ -49,7 +41,6 @@ public class UserDocAdapter extends RecyclerView.Adapter<UserDocAdapter.MyViewHo
             this.exl_amt = itemView.findViewById(R.id.exl_amt);
             this.incl_amt = itemView.findViewById(R.id.incl_amt);
             this.vat = itemView.findViewById(R.id.vat);
-
             this.reject = itemView.findViewById(R.id.reject);
             this.approve = itemView.findViewById(R.id.approve);
         }
@@ -79,16 +70,13 @@ public class UserDocAdapter extends RecyclerView.Adapter<UserDocAdapter.MyViewHo
         TextView exl_amt = holder.exl_amt;
         TextView incl_amt = holder.incl_amt;
         TextView vat = holder.vat;
-
         Button reject = holder.reject;
         Button approve = holder.approve;
-
 
         doc_type.setText(docsData.get(listPosition).getDocType());
         doc_date.setText(docsData.get(listPosition).getDocDate());
         doc_name.setText(docsData.get(listPosition).getDocName());
         account_name.setText(docsData.get(listPosition).getAccountName());
-
         exl_amt.setText(docsData.get(listPosition).getExclAmt());
         incl_amt.setText(docsData.get(listPosition).getInclAmt());
         vat.setText(docsData.get(listPosition).getVATAmt());
@@ -105,8 +93,6 @@ public class UserDocAdapter extends RecyclerView.Adapter<UserDocAdapter.MyViewHo
             @Override
             public void onClick(View v) {
                 onClickListener.rejectOnClick(v, listPosition);
-
-
 
             }
         });
