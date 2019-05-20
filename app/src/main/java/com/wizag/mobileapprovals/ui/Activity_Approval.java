@@ -38,6 +38,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import es.dmoral.toasty.Toasty;
+
 public class Activity_Approval extends AppCompatActivity {
     RecyclerView recyclerView;
     ApprovalAdapter approval_adapter;
@@ -86,7 +88,7 @@ public class Activity_Approval extends AppCompatActivity {
         Log.d("AppStatus", status);
 
 
-        loadDocuments();
+        loadGroups();
 
         proceed.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,7 +130,7 @@ public class Activity_Approval extends AppCompatActivity {
         return false;
     }
 
-    private void loadDocuments() {
+    private void loadGroups() {
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
         final ProgressDialog pDialog = new ProgressDialog(this);
         pDialog.setMessage("Fetching Groups...");
@@ -143,6 +145,7 @@ public class Activity_Approval extends AppCompatActivity {
                     pDialog.dismiss();
                     if (jsonObject != null) {
                         String message = jsonObject.getString("message");
+                        Toasty.success(getApplicationContext(),"User Groups Loaded Successfully",Toasty.LENGTH_LONG).show();
                         docs = jsonObject.getJSONArray("groups");
                         approval_model.clear();
                         for (int k = 0; k < docs.length(); k++) {
@@ -191,9 +194,9 @@ public class Activity_Approval extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                error.printStackTrace();
+//                error.printStackTrace();
                 pDialog.dismiss();
-                Toast.makeText(getApplicationContext(), "An Error Occurred" + error.getMessage(), Toast.LENGTH_LONG).show();
+                Toasty.error(getApplicationContext(), "An Error Occurred" + error.getMessage(), Toast.LENGTH_LONG).show();
 
             }
 
@@ -254,11 +257,14 @@ public class Activity_Approval extends AppCompatActivity {
                             String message = jsonObject.getString("message");
 
                             if (success == "true") {
-                                Toast.makeText(Activity_Approval.this, message, Toast.LENGTH_LONG).show();
-                                startActivity(new Intent(getApplicationContext(), Activity_Admin_Docs.class));
+                                Toasty.success( Activity_Approval.this, message, Toast.LENGTH_LONG).show();
+                                Intent i = new Intent(getApplicationContext(), Activity_Admin_Docs.class);
+                                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                startActivity(i);
                                 finish();
+
                             } else {
-                                Toast.makeText(Activity_Approval.this, "Error in creating workflow", Toast.LENGTH_LONG).show();
+                                Toasty.error(Activity_Approval.this, "Error in creating workflow", Toast.LENGTH_LONG).show();
 
                             }
 
@@ -273,8 +279,8 @@ public class Activity_Approval extends AppCompatActivity {
                 }, new com.android.volley.Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                error.printStackTrace();
-                Toast.makeText(Activity_Approval.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+//                error.printStackTrace();
+                Toasty.error(Activity_Approval.this, "An Error Occurred", Toast.LENGTH_SHORT).show();
 
 
                 pDialog.dismiss();

@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -40,6 +41,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import es.dmoral.toasty.Toasty;
+
 public class Activity_Admin_Docs extends AppCompatActivity {
     RecyclerView recyclerView;
     AdminDocsAdapter adminDocsAdapter;
@@ -49,13 +52,15 @@ public class Activity_Admin_Docs extends AppCompatActivity {
     SessionManager sessionManager;
     String workflow = "";
     LinearLayout parent_layout;
-
+    String AppStatus;
+    TextView empty_view;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_docs);
         setTitle("Admin Documents");
 
+        empty_view = findViewById(R.id.empty_view);
         parent_layout = findViewById(R.id.parent_layout);
         add_doc = findViewById(R.id.add_doc);
         recyclerView = findViewById(R.id.recyclerView);
@@ -70,14 +75,18 @@ public class Activity_Admin_Docs extends AppCompatActivity {
             public void fabOnClick(View v, int position) {
                 Intent intent = new Intent(getApplicationContext(), Activity_Approval.class);
                 AdminDocsModel adminDocsModel = docsModelList.get(position);
+
                 String docType = adminDocsModel.getDocType();
                 String appStatus = adminDocsModel.getAppStatus();
 
                 intent.putExtra("DocType",docType);
                 intent.putExtra("AppStatus",appStatus);
 
+//                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
-
+                /*remove Card*/
+//                docsModelList.remove(position);
+//                adminDocsAdapter.notifyDataSetChanged();
 
             }
 
@@ -109,12 +118,14 @@ public class Activity_Admin_Docs extends AppCompatActivity {
                     pDialog.dismiss();
                     if (jsonObject != null) {
                         String message = jsonObject.getString("message");
+                        Toasty.success(getApplicationContext(),message,Toasty.LENGTH_LONG).show();
                         JSONArray docs = jsonObject.getJSONArray("documents");
                         docsModelList.clear();
                         for (int k = 0; k < docs.length(); k++) {
 //                            docsModelList.clear();
                             AdminDocsModel model_docs = new AdminDocsModel();
                             JSONObject docsObject = docs.getJSONObject(k);
+
 
 
 //                            String doc_id = docsObject.getString("id");
@@ -125,7 +136,7 @@ public class Activity_Admin_Docs extends AppCompatActivity {
                             String ExclAmt = docsObject.getString("ExclAmt");
                             String VATAmt = docsObject.getString("VATAmt");
                             String InclAmt = docsObject.getString("InclAmt");
-                            String AppStatus = docsObject.getString("AppStatus");
+                             AppStatus = docsObject.getString("AppStatus");
 
 
                             if (DocType.equalsIgnoreCase("1")) {
@@ -155,17 +166,19 @@ public class Activity_Admin_Docs extends AppCompatActivity {
 //                                AppStatus = "Rejected";
 //                            }
 
+                            if(AppStatus != null && !AppStatus.equalsIgnoreCase("0")) {
 
-                            model_docs.setDocType(DocType);
-                            model_docs.setDocName(DocName);
-                            model_docs.setAccountName(AccountName);
-                            model_docs.setDocDate(DocDate);
-                            model_docs.setExclAmt("Excl:\t" + ExclAmt);
-                            model_docs.setVATAmt("Vat:\t" + VATAmt);
-                            model_docs.setInclAmt("Incl:\t" + InclAmt);
-                            model_docs.setAppStatus(AppStatus);
-                            docsModelList.add(model_docs);
+                                model_docs.setDocType(DocType);
+                                model_docs.setDocName(DocName);
+                                model_docs.setAccountName(AccountName);
+                                model_docs.setDocDate(DocDate);
+                                model_docs.setExclAmt("Excl:\t" + ExclAmt);
+                                model_docs.setVATAmt("Vat:\t" + VATAmt);
+                                model_docs.setInclAmt("Incl:\t" + InclAmt);
+                                model_docs.setAppStatus(AppStatus);
+                                docsModelList.add(model_docs);
 
+                            }
 
                         }
 
@@ -177,13 +190,14 @@ public class Activity_Admin_Docs extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 adminDocsAdapter.notifyDataSetChanged();
+                toggleEmptyNotes();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                error.printStackTrace();
+//                error.printStackTrace();
                 pDialog.dismiss();
-                Toast.makeText(getApplicationContext(), "An Error Occurred" + error.getMessage(), Toast.LENGTH_LONG).show();
+                Toasty.error(getApplicationContext(), "An Error Occurred" + error.getMessage(), Toast.LENGTH_LONG).show();
 
             }
 
@@ -221,7 +235,7 @@ public class Activity_Admin_Docs extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
+        getMenuInflater().inflate(R.menu.refresh, menu);
         return true;
     }
 
@@ -236,6 +250,9 @@ public class Activity_Admin_Docs extends AppCompatActivity {
             finish();
 
 //            return true;
+        }
+        else if(id ==R.id.refresh){
+            loadDocuments();
         }
 
         return super.onOptionsItemSelected(item);
@@ -257,6 +274,12 @@ public class Activity_Admin_Docs extends AppCompatActivity {
                 .setNegativeButton("No", null)
                 .show();
     }
-
+    private void toggleEmptyNotes() {
+        if (docsModelList.size() > 0) {
+            empty_view.setVisibility(View.GONE);
+        } else {
+            empty_view.setVisibility(View.VISIBLE);
+        }
+    }
 
 }

@@ -8,4 +8,5 @@
     <color name="colorExl">#29b6f6</color>
     <color name="colorDrawable">#1565c0</color>
     <color name="colorScreenBg">#2e242c</color>
+    <color name="black">#000</color>
 </resources>

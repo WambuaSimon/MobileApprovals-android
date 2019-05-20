@@ -91,6 +91,9 @@ public class AdminDocsAdapter extends RecyclerView.Adapter<AdminDocsAdapter.MyVi
             public void onClick(View v) {
                 onClickListener.fabOnClick(v, listPosition);
 
+                docsData.remove(listPosition);
+                notifyDataSetChanged();
+
 
             }
         });

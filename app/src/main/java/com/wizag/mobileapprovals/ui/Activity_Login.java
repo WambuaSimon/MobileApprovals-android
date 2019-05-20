@@ -35,6 +35,8 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import es.dmoral.toasty.Toasty;
+
 public class Activity_Login extends AppCompatActivity {
     Button signin;
     String Login = "http://approvals.wizag.biz/api/v1/login";
@@ -141,8 +143,13 @@ public class Activity_Login extends AppCompatActivity {
                                 editor.putString("IsAdmin", "0");
                                 editor.apply();
 
-                                startActivity(new Intent(getApplicationContext(), Activity_UserDocuments.class));
+
+                                Intent intent = new Intent(getApplicationContext(), Activity_UserDocuments.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
                                 finish();
+
+
                             } else if (IsAdmin.equalsIgnoreCase("1")) {
                                 sessionManager.createLoginSession(Agentname,
                                         GroupID,
@@ -161,8 +168,8 @@ public class Activity_Login extends AppCompatActivity {
                                 startActivity(new Intent(getApplicationContext(), Activity_Admin_Docs.class));
                                 finish();
                             } else {
-                                Toast.makeText(getApplicationContext(), "Check Credentials and try again", Toast.LENGTH_LONG);
-
+//                                Toast.makeText(getApplicationContext(), "Check Credentials and try again", Toast.LENGTH_LONG);
+                                    Toasty.error(getApplicationContext(),"Check Credentials and try again",Toasty.LENGTH_LONG).show();
                             }
 
                         } catch (JSONException e1) {
@@ -175,8 +182,8 @@ public class Activity_Login extends AppCompatActivity {
                 }, new com.android.volley.Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                error.printStackTrace();
-                Toast.makeText(Activity_Login.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+//                error.printStackTrace();
+                Toast.makeText(Activity_Login.this, "An Error Occurred", Toast.LENGTH_SHORT).show();
                 Snackbar.make(parent_layout, R.string.error_occured, Snackbar.LENGTH_LONG)
                         .setAction(R.string.retry, new View.OnClickListener() {
                             @Override

@@ -41,6 +41,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import es.dmoral.toasty.Toasty;
+
 public class Activity_UserDocuments extends AppCompatActivity implements removeRecyclerItem {
     RecyclerView recyclerView;
     UserDocAdapter userDocsAdapter;
@@ -64,7 +66,9 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
         empty_view = findViewById(R.id.empty_view);
         sessionManager = new SessionManager(getApplicationContext());
         HashMap<String, String> user = sessionManager.getUserDetails();
-        groupID = user.get("GroupID");
+        if (!user.isEmpty()) {
+            groupID = user.get("GroupID");
+        }
         recyclerView = findViewById(R.id.recyclerView);
 
 
@@ -74,21 +78,12 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
         loadDocuments();
 
-//        if (docsModelList.isEmpty()) {
-//            recyclerView.setVisibility(View.GONE);
-//            empty_view.setVisibility(View.VISIBLE);
-//        } else {
-//            recyclerView.setVisibility(View.VISIBLE);
-//            empty_view.setVisibility(View.GONE);
-//        }
-
 
         //initializing adapter
         userDocsAdapter = new UserDocAdapter(docsModelList, this, new UserDocAdapter.UsersAdapterListener() {
             @Override
-            public void approveOnClick(View v, int position) {
+            public void approveOnClick(View v, final int position) {
                 id_to_update = docsModelList.get(position).DocType;
-
 
 
                 final AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
@@ -105,8 +100,11 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 // Write your code here to execute after dialog
-                                approve();
 
+
+                                approve();
+                                docsModelList.remove(position);
+                                userDocsAdapter.notifyDataSetChanged();
                             }
                         });
 
@@ -125,7 +123,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
             }
 
             @Override
-            public void rejectOnClick(View v, int position) {
+            public void rejectOnClick(View v, final int position) {
                 id_to_update = docsModelList.get(position).DocType;
 
 
@@ -134,6 +132,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
                 final EditText edittext = new EditText(getApplicationContext());
                 edittext.setPadding(7, 7, 7, 7);
+                edittext.setTextColor(getResources().getColor(R.color.black));
 
 //                alert.setMessage("Enter Your Message");
                 alert.setTitle("Reason for Rejecting");
@@ -148,6 +147,8 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                         } else {
 
                             reject();
+                            docsModelList.remove(position);
+                            userDocsAdapter.notifyDataSetChanged();
                         }
                     }
                 });
@@ -164,6 +165,14 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
 
         recyclerView.setAdapter(userDocsAdapter);
+
+//        if (docsModelList.isEmpty()) {
+//            recyclerView.setVisibility(View.GONE);
+//            empty_view.setVisibility(View.VISIBLE);
+//        } else {
+//            recyclerView.setVisibility(View.VISIBLE);
+//            empty_view.setVisibility(View.GONE);
+//        }
 //        userDocsAdapter.notifyDataSetChanged();
 
     }
@@ -185,7 +194,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
                         String success = jsonObject.getString("success");
                         String message = jsonObject.getString("message");
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                        Toasty.success(context, message, Toast.LENGTH_SHORT).show();
 
                         JSONArray documents = jsonObject.getJSONArray("documents");
 
@@ -204,8 +213,8 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
 
                                         JSONObject singleDoc = docsObject.getJSONObject("document");
-
-                                        if (singleDoc != null) {
+                                        String AppStatus = singleDoc.getString("AppStatus");
+                                        if (singleDoc != null && AppStatus.equalsIgnoreCase("0")) {
 
                                             /*Load Documents*/
 
@@ -216,7 +225,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                                             String ExclAmt = singleDoc.getString("ExclAmt");
                                             String VATAmt = singleDoc.getString("VATAmt");
                                             String InclAmt = singleDoc.getString("InclAmt");
-                                            String AppStatus = singleDoc.getString("AppStatus");
+
 
 
                                             if (DocType.equalsIgnoreCase("1")) {
@@ -236,18 +245,6 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                                             } else {
                                                 DocName = "Cheque";
                                             }
-
-                                            /*DOC STATUS*/
-//                                    if (AppStatus.equalsIgnoreCase("1")) {
-//                                        AppStatus = "Not Approved";
-//                                    } else if (AppStatus.equalsIgnoreCase("2")) {
-//                                        AppStatus = "Partially Approved";
-//                                    } else if (AppStatus.equalsIgnoreCase("3")) {
-//                                        AppStatus = "Approved";
-//                                    } else if (AppStatus.equalsIgnoreCase("4")) {
-//                                        AppStatus = "Rejected";
-//                                    }
-
 
                                             model_docs.setDocType(DocType);
                                             model_docs.setDocName(DocName);
@@ -280,6 +277,8 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                     e.printStackTrace();
                 }
                 userDocsAdapter.notifyDataSetChanged();
+
+                toggleEmptyNotes();
             }
         }, new Response.ErrorListener() {
             @Override
@@ -349,6 +348,9 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
             finish();
 
 //            return true;
+        } else if (id == R.id.refresh) {
+            loadDocuments();
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -392,10 +394,10 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
 
                             if (success == "true") {
-                                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                                Toasty.success(getApplicationContext(), message, Toast.LENGTH_LONG).show();
 
                             } else {
-                                Toast.makeText(getApplicationContext(), "Error in updating document", Toast.LENGTH_LONG).show();
+                                Toasty.error(getApplicationContext(), "Error in updating document", Toast.LENGTH_LONG).show();
 
                             }
 
@@ -410,8 +412,8 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                 }, new com.android.volley.Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                error.printStackTrace();
-                Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+//                error.printStackTrace();
+                Toasty.error(getApplicationContext(), "An Error Occurred", Toast.LENGTH_SHORT).show();
 
 
                 pDialog.dismiss();
@@ -473,10 +475,10 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
 
                             if (success == "true") {
-                                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                                Toasty.success(getApplicationContext(), message, Toast.LENGTH_LONG).show();
 
                             } else {
-                                Toast.makeText(getApplicationContext(), "Error in updating document", Toast.LENGTH_LONG).show();
+                                Toasty.error(getApplicationContext(), "Error in updating document", Toast.LENGTH_LONG).show();
 
                             }
 
@@ -491,8 +493,8 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                 }, new com.android.volley.Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                error.printStackTrace();
-                Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+//                error.printStackTrace();
+                Toasty.error(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
 
 
                 pDialog.dismiss();
@@ -532,4 +534,13 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
         queue.add(stringRequest);
 
     }
+
+    private void toggleEmptyNotes() {
+        if (docsModelList.size() > 0) {
+            empty_view.setVisibility(View.GONE);
+        } else {
+            empty_view.setVisibility(View.VISIBLE);
+        }
+    }
+
 }
