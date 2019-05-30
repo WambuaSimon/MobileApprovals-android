@@ -166,15 +166,6 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
         recyclerView.setAdapter(userDocsAdapter);
 
-//        if (docsModelList.isEmpty()) {
-//            recyclerView.setVisibility(View.GONE);
-//            empty_view.setVisibility(View.VISIBLE);
-//        } else {
-//            recyclerView.setVisibility(View.VISIBLE);
-//            empty_view.setVisibility(View.GONE);
-//        }
-//        userDocsAdapter.notifyDataSetChanged();
-
     }
 
     private void loadDocuments() {
@@ -204,16 +195,19 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
                                 UserDocsModel model_docs = new UserDocsModel();
                                 JSONObject docsObject = documents.getJSONObject(k);
+
+                                String isApproved = docsObject.getString("IsApproved");
                                 JSONArray sequenceID = docsObject.getJSONArray("SequenceID");
                                 for (int p = 0; p < sequenceID.length(); p++) {
                                     JSONObject sequenceObject = sequenceID.getJSONObject(p);
                                     String seq_id = sequenceObject.getString("id");
 
-                                    if (seq_id.contains(groupID)) {
+                                    if (seq_id.contains(groupID) && !isApproved.equalsIgnoreCase("1")) {
 
 
                                         JSONObject singleDoc = docsObject.getJSONObject("document");
                                         String AppStatus = singleDoc.getString("AppStatus");
+
                                         if (singleDoc != null && AppStatus.equalsIgnoreCase("0")) {
 
                                             /*Load Documents*/

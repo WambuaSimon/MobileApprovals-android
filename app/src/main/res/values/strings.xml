@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MobileApprovals</string>
+    <string name="app_name">WizApprove</string>
     <string name="service_prompt">Select Approver</string>
     <string name="connection">Ensure you have internet connection to continue</string>
     <string name="retry">Retry</string>

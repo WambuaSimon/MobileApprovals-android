@@ -61,6 +61,7 @@ public class Activity_Login extends AppCompatActivity {
         SharedPreferences sp = getSharedPreferences("login", MODE_PRIVATE);
         if (sp != null) {
             String IsAdmin = sp.getString("IsAdmin", null);
+
 //            Toast.makeText(this, IsAdmin, Toast.LENGTH_SHORT).show();
 
 

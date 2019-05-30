@@ -7,20 +7,12 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/esl"
+        android:icon="@drawable/new_logo"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/esl"
+        android:roundIcon="@drawable/new_logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light">
         <activity android:name=".ui.Activity_UserDocuments"></activity>
-        <activity android:name=".ui.Activity_UserLogin">
-            <!--<intent-filter>-->
-            <!--<action android:name="android.intent.action.MAIN" />-->
-
-            <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
-
-        </activity>
 
         <activity android:name=".ui.Activity_Approval" />
         <activity android:name=".ui.Activity_Login">
@@ -31,7 +23,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.Activity_Admin_Docs" />
-        <activity android:name=".MainActivity" />
+        <activity android:name=".MainActivity" >
+
+        </activity>
     </application>
 
 </manifest>

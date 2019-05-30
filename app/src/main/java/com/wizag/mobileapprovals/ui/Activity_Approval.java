@@ -145,7 +145,7 @@ public class Activity_Approval extends AppCompatActivity {
                     pDialog.dismiss();
                     if (jsonObject != null) {
                         String message = jsonObject.getString("message");
-                        Toasty.success(getApplicationContext(),"User Groups Loaded Successfully",Toasty.LENGTH_LONG).show();
+                        Toasty.success(getApplicationContext(), "User Groups Loaded Successfully", Toasty.LENGTH_LONG).show();
                         docs = jsonObject.getJSONArray("groups");
                         approval_model.clear();
                         for (int k = 0; k < docs.length(); k++) {
@@ -257,7 +257,7 @@ public class Activity_Approval extends AppCompatActivity {
                             String message = jsonObject.getString("message");
 
                             if (success == "true") {
-                                Toasty.success( Activity_Approval.this, message, Toast.LENGTH_LONG).show();
+                                Toasty.success(Activity_Approval.this, message, Toast.LENGTH_LONG).show();
                                 Intent i = new Intent(getApplicationContext(), Activity_Admin_Docs.class);
                                 i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                                 startActivity(i);
@@ -298,9 +298,6 @@ public class Activity_Approval extends AppCompatActivity {
                 params.put("IsApproved", status);
                 Log.d("SequenceIDString", array.toString());
                 return params;
-
-//                "\"[{\"id\":\"1\"},{\"id\":\"2\"},{\"id\":\"3\"},{\"id\":\"4\"},{\"id\":\"5\"},{\"id\":\"6\"}]\""
-
             }
 
 

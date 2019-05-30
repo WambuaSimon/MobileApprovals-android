@@ -7,7 +7,6 @@ import android.content.SharedPreferences.Editor;
 
 
 import com.wizag.mobileapprovals.ui.Activity_Login;
-import com.wizag.mobileapprovals.ui.Activity_UserLogin;
 
 import java.util.HashMap;
 
