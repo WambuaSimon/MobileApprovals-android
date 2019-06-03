@@ -26,6 +26,7 @@ import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+
 import com.wizag.mobileapprovals.R;
 import com.wizag.mobileapprovals.adapters.AdminDocsAdapter;
 import com.wizag.mobileapprovals.models.AdminDocsModel;
@@ -62,11 +63,11 @@ public class Activity_Admin_Docs extends AppCompatActivity {
 
         empty_view = findViewById(R.id.empty_view);
         parent_layout = findViewById(R.id.parent_layout);
-        add_doc = findViewById(R.id.add_doc);
+//        add_doc = findViewById(R.id.add_doc);
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getApplicationContext(), DividerItemDecoration.VERTICAL));
         docsModelList = new ArrayList<>();
         loadDocuments();
         //initializing adapter
@@ -84,9 +85,6 @@ public class Activity_Admin_Docs extends AppCompatActivity {
 
 //                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
-                /*remove Card*/
-//                docsModelList.remove(position);
-//                adminDocsAdapter.notifyDataSetChanged();
 
             }
 

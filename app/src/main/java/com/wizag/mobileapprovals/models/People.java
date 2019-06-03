@@ -2,20 +2,20 @@ package com.wizag.mobileapprovals.models;
 
 public class People {
 
-    private String name, lastName;
-    private int id;
+    private String name;
+    private String id;
 
-    public People(String name, String lastName, int id) {
+    public People(String name ,String id) {
         this.name = name;
-        this.lastName = lastName;
+
         this.id = id;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -27,11 +27,4 @@ public class People {
         this.name = name;
     }
 
-    public String getlastName() {
-        return lastName;
-    }
-
-    public void setlastName(String lastName) {
-        this.lastName = lastName;
-    }
 }
