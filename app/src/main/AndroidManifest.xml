@@ -12,8 +12,10 @@
         android:roundIcon="@drawable/another_logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light">
-        <activity android:name=".ui.Activity_UserDocuments"></activity>
+        <activity android:name=".ui.Timer2">
 
+        </activity>
+        <activity android:name=".ui.Activity_UserDocuments" />
         <activity android:name=".ui.Activity_Approval" />
         <activity android:name=".ui.Activity_Login">
             <intent-filter>
@@ -23,9 +25,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.Activity_Admin_Docs" />
-        <activity android:name=".MainActivity" >
-
-        </activity>
+        <activity android:name=".MainActivity" />
     </application>
 
 </manifest>

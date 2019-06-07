@@ -1,85 +1,40 @@
 package com.wizag.mobileapprovals.models;
 
+import com.google.gson.annotations.SerializedName;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class AdminDocsModel {
-    public String DocType;
-    public String AppStatus;
-    public String DocName;
-    public String AccountName;
-    public String DocDate;
-    public String ExclAmt;
-    public String VATAmt;
-    public String InclAmt;
-    public String StatusDescription;
+    @SerializedName("success")
+    public boolean status;
+    @SerializedName("message")
+    public String message;
+    @SerializedName("documents")
+    public List<AdminDocuments> adminDocumentsList = new ArrayList<>();
 
-    public String getDocType() {
-        return DocType;
+
+    public boolean isStatus() {
+        return status;
     }
 
-    public void setDocType(String docType) {
-        DocType = docType;
+    public void setStatus(boolean status) {
+        this.status = status;
     }
 
-    public String getAppStatus() {
-        return AppStatus;
+    public String getMessage() {
+        return message;
     }
 
-    public void setAppStatus(String appStatus) {
-        AppStatus = appStatus;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
-    public String getDocName() {
-        return DocName;
+    public List<AdminDocuments> getAdminDocumentsList() {
+        return adminDocumentsList;
     }
 
-    public void setDocName(String docName) {
-        DocName = docName;
-    }
-
-    public String getAccountName() {
-        return AccountName;
-    }
-
-    public void setAccountName(String accountName) {
-        AccountName = accountName;
-    }
-
-    public String getDocDate() {
-        return DocDate;
-    }
-
-    public void setDocDate(String docDate) {
-        DocDate = docDate;
-    }
-
-    public String getExclAmt() {
-        return ExclAmt;
-    }
-
-    public void setExclAmt(String exclAmt) {
-        ExclAmt = exclAmt;
-    }
-
-    public String getVATAmt() {
-        return VATAmt;
-    }
-
-    public void setVATAmt(String VATAmt) {
-        this.VATAmt = VATAmt;
-    }
-
-    public String getInclAmt() {
-        return InclAmt;
-    }
-
-    public void setInclAmt(String inclAmt) {
-        InclAmt = inclAmt;
-    }
-
-    public String getStatusDescription() {
-        return StatusDescription;
-    }
-
-    public void setStatusDescription(String statusDescription) {
-        StatusDescription = statusDescription;
+    public void setAdminDocumentsList(List<AdminDocuments> adminDocumentsList) {
+        this.adminDocumentsList = adminDocumentsList;
     }
 }

@@ -21,7 +21,6 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
@@ -30,6 +29,9 @@ import com.android.volley.toolbox.Volley;
 import com.wizag.mobileapprovals.R;
 import com.wizag.mobileapprovals.adapters.AdminDocsAdapter;
 import com.wizag.mobileapprovals.models.AdminDocsModel;
+import com.wizag.mobileapprovals.models.AdminDocuments;
+import com.wizag.mobileapprovals.network.APIClient;
+import com.wizag.mobileapprovals.network.APiInterface;
 import com.wizag.mobileapprovals.utils.MySingleton;
 import com.wizag.mobileapprovals.utils.SessionManager;
 
@@ -43,11 +45,14 @@ import java.util.List;
 import java.util.Map;
 
 import es.dmoral.toasty.Toasty;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class Activity_Admin_Docs extends AppCompatActivity {
     RecyclerView recyclerView;
     AdminDocsAdapter adminDocsAdapter;
-    List<AdminDocsModel> docsModelList;
+    List<AdminDocuments> docsModelList;
 
     FloatingActionButton add_doc;
     SessionManager sessionManager;
@@ -55,12 +60,15 @@ public class Activity_Admin_Docs extends AppCompatActivity {
     LinearLayout parent_layout;
     String AppStatus;
     TextView empty_view;
+    APiInterface aPiInterface;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_docs);
         setTitle("Admin Documents");
 
+        aPiInterface = APIClient.getClient(this).create(APiInterface.class);
         empty_view = findViewById(R.id.empty_view);
         parent_layout = findViewById(R.id.parent_layout);
 //        add_doc = findViewById(R.id.add_doc);
@@ -75,7 +83,7 @@ public class Activity_Admin_Docs extends AppCompatActivity {
             @Override
             public void fabOnClick(View v, int position) {
                 Intent intent = new Intent(getApplicationContext(), Activity_Approval.class);
-                AdminDocsModel adminDocsModel = docsModelList.get(position);
+                AdminDocuments adminDocsModel = docsModelList.get(position);
 
                 String docType = adminDocsModel.getDocType();
                 String appStatus = adminDocsModel.getAppStatus();
@@ -94,142 +102,183 @@ public class Activity_Admin_Docs extends AppCompatActivity {
         recyclerView.setAdapter(adminDocsAdapter);
         adminDocsAdapter.notifyDataSetChanged();
 
+
         /*ADD DOC APPROVAL W/F*/
-
         sessionManager = new SessionManager(getApplicationContext());
-
 
     }
 
-    private void loadDocuments() {
-        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
-        final ProgressDialog pDialog = new ProgressDialog(this);
-        pDialog.setMessage("Fetching Documents...");
-        pDialog.setCancelable(false);
-        pDialog.show();
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, "http://approvals.wizag.biz/api/v1/documents", new Response.Listener<String>() {
+    void loadDocuments() {
+
+        Call<AdminDocsModel> adminDocsModelCall = aPiInterface.getAdminDocs();
+        adminDocsModelCall.enqueue(new Callback<AdminDocsModel>() {
             @Override
-            public void onResponse(String response) {
-                try {
+            public void onResponse(Call<AdminDocsModel> call, Response<AdminDocsModel> response) {
+                AdminDocsModel adminDocsModel = response.body();
+                if (adminDocsModel.isStatus() == true) {
+                    String message = adminDocsModel.getMessage();
+                    Toasty.success(getApplicationContext(), message, Toasty.LENGTH_LONG);
+                    List<AdminDocuments> adminDocumentsList = adminDocsModel.getAdminDocumentsList();
+                    AdminDocuments adminDocumentsModel = null;
+                    for (int i = 0; i < adminDocumentsList.size(); i++) {
+                        adminDocumentsModel = new AdminDocuments();
 
-                    JSONObject jsonObject = new JSONObject(response);
-                    pDialog.dismiss();
-                    if (jsonObject != null) {
-                        String message = jsonObject.getString("message");
-                        Toasty.success(getApplicationContext(),message,Toasty.LENGTH_LONG).show();
-                        JSONArray docs = jsonObject.getJSONArray("documents");
-                        docsModelList.clear();
-                        for (int k = 0; k < docs.length(); k++) {
-//                            docsModelList.clear();
-                            AdminDocsModel model_docs = new AdminDocsModel();
-                            JSONObject docsObject = docs.getJSONObject(k);
+                        String docType = adminDocumentsList.get(i).getDocType();
+                        String DocName = adminDocumentsList.get(i).getDocName();
+                        String AccountName = adminDocumentsList.get(i).getAccountName();
+                        String DocDate = adminDocumentsList.get(i).getDocDate();
+                        String ExclAmt = adminDocumentsList.get(i).getExclAmt();
+                        String VATAmt = adminDocumentsList.get(i).getVATAmt();
+                        String InclAmt = adminDocumentsList.get(i).getInclAmt();
+                        AppStatus = adminDocumentsList.get(i).getAppStatus();
 
-
-
-//                            String doc_id = docsObject.getString("id");
-                            String DocType = docsObject.getString("DocType");
-                            String DocName = docsObject.getString("DocName");
-                            String AccountName = docsObject.getString("AccountName");
-                            String DocDate = docsObject.getString("DocDate");
-                            String ExclAmt = docsObject.getString("ExclAmt");
-                            String VATAmt = docsObject.getString("VATAmt");
-                            String InclAmt = docsObject.getString("InclAmt");
-                             AppStatus = docsObject.getString("AppStatus");
-
-
-                            if (DocType.equalsIgnoreCase("1")) {
-                                DocName = "Invoice";
-                            } else if (DocType.equalsIgnoreCase("2")) {
-                                DocName = "PO";
-                            } else if (DocType.equalsIgnoreCase("3")) {
-                                DocName = "Credit Note";
-                            } else if (DocType.equalsIgnoreCase("4")) {
-                                DocName = "PO";
-                            } else if (DocType.equalsIgnoreCase("5")) {
-                                DocName = "Receipt";
-                            } else if (DocType.equalsIgnoreCase("6")) {
-                                DocName = "Cash Memo";
-                            } else if (DocType.equalsIgnoreCase("7")) {
-                                DocName = "Supplier Note";
-                            }
-
-//                            /*DOC STATUS*/
-//                            if (AppStatus.equalsIgnoreCase("1")) {
-//                                AppStatus = "Not Approved";
-//                            } else if (AppStatus.equalsIgnoreCase("2")) {
-//                                AppStatus = "Partially Approved";
-//                            } else if (AppStatus.equalsIgnoreCase("3")) {
-//                                AppStatus = "Approved";
-//                            } else if (AppStatus.equalsIgnoreCase("4")) {
-//                                AppStatus = "Rejected";
-//                            }
-
-                            if(AppStatus != null && !AppStatus.equalsIgnoreCase("0")) {
-
-                                model_docs.setDocType(DocType);
-                                model_docs.setDocName(DocName);
-                                model_docs.setAccountName(AccountName);
-                                model_docs.setDocDate(DocDate);
-                                model_docs.setExclAmt("Excl:\t" + ExclAmt);
-                                model_docs.setVATAmt("Vat:\t" + VATAmt);
-                                model_docs.setInclAmt("Incl:\t" + InclAmt);
-                                model_docs.setAppStatus(AppStatus);
-                                docsModelList.add(model_docs);
-
-                            }
+                        if (AppStatus != null && AppStatus.equalsIgnoreCase("0")) {
+//
+                            adminDocumentsModel.setDocType(docType);
+                            adminDocumentsModel.setDocName(DocName);
+                            adminDocumentsModel.setAccountName(AccountName);
+                            adminDocumentsModel.setDocDate(DocDate);
+                            adminDocumentsModel.setExclAmt("Excl:\t" + ExclAmt);
+                            adminDocumentsModel.setVATAmt("Vat:\t" + VATAmt);
+                            adminDocumentsModel.setInclAmt("Incl:\t" + InclAmt);
+                            adminDocumentsModel.setAppStatus(AppStatus);
+                            docsModelList.add(adminDocumentsModel);
 
                         }
-
 
                     }
 
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 }
                 adminDocsAdapter.notifyDataSetChanged();
-                toggleEmptyNotes();
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-//                error.printStackTrace();
-                pDialog.dismiss();
-                Toasty.error(getApplicationContext(), "An Error Occurred" + error.getMessage(), Toast.LENGTH_LONG).show();
-
-            }
-
-
-        }) {
 
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>();
-                sessionManager = new SessionManager(getApplicationContext());
-                HashMap<String, String> user = sessionManager.getUserDetails();
-                String accessToken = user.get("token");
+            public void onFailure(Call<AdminDocsModel> call, Throwable t) {
 
-                String bearer = "Bearer " + accessToken;
-                Map<String, String> headersSys = super.getHeaders();
-                Map<String, String> headers = new HashMap<String, String>();
-                headersSys.remove("Authorization");
-                headers.put("Authorization", bearer);
-                headers.putAll(headersSys);
-                return headers;
             }
-        };
-
-
-        MySingleton.getInstance(this).addToRequestQueue(stringRequest);
-
-
-        int socketTimeout = 30000;
-        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
-        stringRequest.setRetryPolicy(policy);
-        requestQueue.add(stringRequest);
-
-
+        });
     }
+
+
+//    private void loadDocuments() {
+//        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+//        final ProgressDialog pDialog = new ProgressDialog(this);
+//        pDialog.setMessage("Fetching Documents...");
+//        pDialog.setCancelable(false);
+//        pDialog.show();
+//        StringRequest stringRequest = new StringRequest(Request.Method.GET, "http://approvals.wizag.biz/api/v1/documents", new Response.Listener<String>() {
+//            @Override
+//            public void onResponse(String response) {
+//                try {
+//
+//                    JSONObject jsonObject = new JSONObject(response);
+//                    pDialog.dismiss();
+//                    if (jsonObject != null) {
+//                        String message = jsonObject.getString("message");
+//                        Toasty.success(getApplicationContext(),message,Toasty.LENGTH_LONG).show();
+//                        JSONArray docs = jsonObject.getJSONArray("documents");
+//                        docsModelList.clear();
+//                        for (int k = 0; k < docs.length(); k++) {
+////                            docsModelList.clear();
+//                            AdminDocsModel model_docs = new AdminDocsModel();
+//                            JSONObject docsObject = docs.getJSONObject(k);
+//
+////                            String doc_id = docsObject.getString("id");
+//                            String DocType = docsObject.getString("DocType");
+//                            String DocName = docsObject.getString("DocName");
+//                            String AccountName = docsObject.getString("AccountName");
+//                            String DocDate = docsObject.getString("DocDate");
+//                            String ExclAmt = docsObject.getString("ExclAmt");
+//                            String VATAmt = docsObject.getString("VATAmt");
+//                            String InclAmt = docsObject.getString("InclAmt");
+//                             AppStatus = docsObject.getString("AppStatus");
+//
+//
+//                            if (DocType.equalsIgnoreCase("1")) {
+//                                DocName = "Invoice";
+//                            } else if (DocType.equalsIgnoreCase("2")) {
+//                                DocName = "PO";
+//                            } else if (DocType.equalsIgnoreCase("3")) {
+//                                DocName = "Credit Note";
+//                            } else if (DocType.equalsIgnoreCase("4")) {
+//                                DocName = "PO";
+//                            } else if (DocType.equalsIgnoreCase("5")) {
+//                                DocName = "Receipt";
+//                            } else if (DocType.equalsIgnoreCase("6")) {
+//                                DocName = "Cash Memo";
+//                            } else if (DocType.equalsIgnoreCase("7")) {
+//                                DocName = "Supplier Note";
+//                            }
+//
+//
+//
+//                            if(AppStatus != null && AppStatus.equalsIgnoreCase("0")) {
+//
+//                                model_docs.setDocType(DocType);
+//                                model_docs.setDocName(DocName);
+//                                model_docs.setAccountName(AccountName);
+//                                model_docs.setDocDate(DocDate);
+//                                model_docs.setExclAmt("Excl:\t" + ExclAmt);
+//                                model_docs.setVATAmt("Vat:\t" + VATAmt);
+//                                model_docs.setInclAmt("Incl:\t" + InclAmt);
+//                                model_docs.setAppStatus(AppStatus);
+//                                docsModelList.add(model_docs);
+//
+//                            }
+//
+//                        }
+//
+//
+//                    }
+//
+//
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//                adminDocsAdapter.notifyDataSetChanged();
+//                toggleEmptyNotes();
+//            }
+//        }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+////                error.printStackTrace();
+//                pDialog.dismiss();
+//                Toasty.error(getApplicationContext(), "An Error Occurred" + error.getMessage(), Toast.LENGTH_LONG).show();
+//
+//            }
+//
+//
+//        }) {
+//
+//            @Override
+//            public Map<String, String> getHeaders() throws AuthFailureError {
+//                Map<String, String> params = new HashMap<String, String>();
+//                sessionManager = new SessionManager(getApplicationContext());
+//                HashMap<String, String> user = sessionManager.getUserDetails();
+//                String accessToken = user.get("token");
+//
+//                String bearer = "Bearer " + accessToken;
+//                Map<String, String> headersSys = super.getHeaders();
+//                Map<String, String> headers = new HashMap<String, String>();
+//                headersSys.remove("Authorization");
+//                headers.put("Authorization", bearer);
+//                headers.putAll(headersSys);
+//                return headers;
+//            }
+//        };
+//
+//
+//        MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+//
+//
+//        int socketTimeout = 30000;
+//        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+//        stringRequest.setRetryPolicy(policy);
+//        requestQueue.add(stringRequest);
+//
+//
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -248,8 +297,7 @@ public class Activity_Admin_Docs extends AppCompatActivity {
             finish();
 
 //            return true;
-        }
-        else if(id ==R.id.refresh){
+        } else if (id == R.id.refresh) {
             loadDocuments();
         }
 
@@ -272,6 +320,7 @@ public class Activity_Admin_Docs extends AppCompatActivity {
                 .setNegativeButton("No", null)
                 .show();
     }
+
     private void toggleEmptyNotes() {
         if (docsModelList.size() > 0) {
             empty_view.setVisibility(View.GONE);

@@ -11,13 +11,14 @@ import android.widget.TextView;
 
 import com.wizag.mobileapprovals.R;
 import com.wizag.mobileapprovals.models.AdminDocsModel;
+import com.wizag.mobileapprovals.models.AdminDocuments;
 import com.wizag.mobileapprovals.ui.Activity_Approval;
 
 import java.util.List;
 
 public class AdminDocsAdapter extends RecyclerView.Adapter<AdminDocsAdapter.MyViewHolder> {
 
-    private List<AdminDocsModel> docsData;
+    private List<AdminDocuments> docsData;
     Context context;
     public AdminDocsAdapterListener onClickListener;
 
@@ -49,7 +50,7 @@ public class AdminDocsAdapter extends RecyclerView.Adapter<AdminDocsAdapter.MyVi
         }
     }
 
-    public AdminDocsAdapter(List<AdminDocsModel> data, Context context, AdminDocsAdapterListener listener) {
+    public AdminDocsAdapter(List<AdminDocuments> data, Context context, AdminDocsAdapterListener listener) {
         this.docsData = data;
         this.context = context;
         this.onClickListener = listener;
