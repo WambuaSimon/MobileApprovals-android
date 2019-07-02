@@ -10,21 +10,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.android.volley.AuthFailureError;
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.RetryPolicy;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 
 import com.wizag.mobileapprovals.R;
 import com.wizag.mobileapprovals.adapters.AdminDocsAdapter;
@@ -32,19 +23,13 @@ import com.wizag.mobileapprovals.models.AdminDocsModel;
 import com.wizag.mobileapprovals.models.AdminDocuments;
 import com.wizag.mobileapprovals.network.APIClient;
 import com.wizag.mobileapprovals.network.APiInterface;
-import com.wizag.mobileapprovals.utils.MySingleton;
 import com.wizag.mobileapprovals.utils.SessionManager;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import es.dmoral.toasty.Toasty;
+import io.reactivex.disposables.CompositeDisposable;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -61,12 +46,17 @@ public class Activity_Admin_Docs extends AppCompatActivity {
     String AppStatus;
     TextView empty_view;
     APiInterface aPiInterface;
+    private CompositeDisposable disposable = new CompositeDisposable();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_docs);
-        setTitle("Admin Documents");
+
+
+        Toolbar myToolbar = findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+
 
         aPiInterface = APIClient.getClient(this).create(APiInterface.class);
         empty_view = findViewById(R.id.empty_view);
@@ -75,7 +65,9 @@ public class Activity_Admin_Docs extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.addItemDecoration(new DividerItemDecoration(getApplicationContext(), DividerItemDecoration.VERTICAL));
+
+        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
+//        recyclerView.addItemDecoration(new DividerItemDecoration(getApplicationContext(), DividerItemDecoration.VERTICAL));
         docsModelList = new ArrayList<>();
         loadDocuments();
         //initializing adapter
@@ -88,8 +80,8 @@ public class Activity_Admin_Docs extends AppCompatActivity {
                 String docType = adminDocsModel.getDocType();
                 String appStatus = adminDocsModel.getAppStatus();
 
-                intent.putExtra("DocType",docType);
-                intent.putExtra("AppStatus",appStatus);
+                intent.putExtra("DocType", docType);
+                intent.putExtra("AppStatus", appStatus);
 
 //                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
@@ -109,15 +101,22 @@ public class Activity_Admin_Docs extends AppCompatActivity {
     }
 
     void loadDocuments() {
+        final ProgressDialog pDialog = new ProgressDialog(this);
+        pDialog.setMessage("Fetching Documents...");
+        pDialog.setCancelable(false);
+        pDialog.show();
 
         Call<AdminDocsModel> adminDocsModelCall = aPiInterface.getAdminDocs();
         adminDocsModelCall.enqueue(new Callback<AdminDocsModel>() {
             @Override
             public void onResponse(Call<AdminDocsModel> call, Response<AdminDocsModel> response) {
+                pDialog.dismiss();
                 AdminDocsModel adminDocsModel = response.body();
                 if (adminDocsModel.isStatus() == true) {
+                    docsModelList.clear();
+
                     String message = adminDocsModel.getMessage();
-                    Toasty.success(getApplicationContext(), message, Toasty.LENGTH_LONG);
+                    Toasty.success(getApplicationContext(), message, Toasty.LENGTH_SHORT);
                     List<AdminDocuments> adminDocumentsList = adminDocsModel.getAdminDocumentsList();
                     AdminDocuments adminDocumentsModel = null;
                     for (int i = 0; i < adminDocumentsList.size(); i++) {
@@ -149,140 +148,26 @@ public class Activity_Admin_Docs extends AppCompatActivity {
                     }
 
 
+                } else {
+                    Toasty.error(getApplicationContext(), "An Error Occured while loading data", Toasty.LENGTH_LONG).show();
+
                 }
                 adminDocsAdapter.notifyDataSetChanged();
+                toggleEmptyNotes();
             }
 
             @Override
             public void onFailure(Call<AdminDocsModel> call, Throwable t) {
-
+                pDialog.dismiss();
+                Toasty.error(getApplicationContext(), "Could not load data", Toasty.LENGTH_LONG).show();
             }
         });
     }
 
 
-//    private void loadDocuments() {
-//        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
-//        final ProgressDialog pDialog = new ProgressDialog(this);
-//        pDialog.setMessage("Fetching Documents...");
-//        pDialog.setCancelable(false);
-//        pDialog.show();
-//        StringRequest stringRequest = new StringRequest(Request.Method.GET, "http://approvals.wizag.biz/api/v1/documents", new Response.Listener<String>() {
-//            @Override
-//            public void onResponse(String response) {
-//                try {
-//
-//                    JSONObject jsonObject = new JSONObject(response);
-//                    pDialog.dismiss();
-//                    if (jsonObject != null) {
-//                        String message = jsonObject.getString("message");
-//                        Toasty.success(getApplicationContext(),message,Toasty.LENGTH_LONG).show();
-//                        JSONArray docs = jsonObject.getJSONArray("documents");
-//                        docsModelList.clear();
-//                        for (int k = 0; k < docs.length(); k++) {
-////                            docsModelList.clear();
-//                            AdminDocsModel model_docs = new AdminDocsModel();
-//                            JSONObject docsObject = docs.getJSONObject(k);
-//
-////                            String doc_id = docsObject.getString("id");
-//                            String DocType = docsObject.getString("DocType");
-//                            String DocName = docsObject.getString("DocName");
-//                            String AccountName = docsObject.getString("AccountName");
-//                            String DocDate = docsObject.getString("DocDate");
-//                            String ExclAmt = docsObject.getString("ExclAmt");
-//                            String VATAmt = docsObject.getString("VATAmt");
-//                            String InclAmt = docsObject.getString("InclAmt");
-//                             AppStatus = docsObject.getString("AppStatus");
-//
-//
-//                            if (DocType.equalsIgnoreCase("1")) {
-//                                DocName = "Invoice";
-//                            } else if (DocType.equalsIgnoreCase("2")) {
-//                                DocName = "PO";
-//                            } else if (DocType.equalsIgnoreCase("3")) {
-//                                DocName = "Credit Note";
-//                            } else if (DocType.equalsIgnoreCase("4")) {
-//                                DocName = "PO";
-//                            } else if (DocType.equalsIgnoreCase("5")) {
-//                                DocName = "Receipt";
-//                            } else if (DocType.equalsIgnoreCase("6")) {
-//                                DocName = "Cash Memo";
-//                            } else if (DocType.equalsIgnoreCase("7")) {
-//                                DocName = "Supplier Note";
-//                            }
-//
-//
-//
-//                            if(AppStatus != null && AppStatus.equalsIgnoreCase("0")) {
-//
-//                                model_docs.setDocType(DocType);
-//                                model_docs.setDocName(DocName);
-//                                model_docs.setAccountName(AccountName);
-//                                model_docs.setDocDate(DocDate);
-//                                model_docs.setExclAmt("Excl:\t" + ExclAmt);
-//                                model_docs.setVATAmt("Vat:\t" + VATAmt);
-//                                model_docs.setInclAmt("Incl:\t" + InclAmt);
-//                                model_docs.setAppStatus(AppStatus);
-//                                docsModelList.add(model_docs);
-//
-//                            }
-//
-//                        }
-//
-//
-//                    }
-//
-//
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//                adminDocsAdapter.notifyDataSetChanged();
-//                toggleEmptyNotes();
-//            }
-//        }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-////                error.printStackTrace();
-//                pDialog.dismiss();
-//                Toasty.error(getApplicationContext(), "An Error Occurred" + error.getMessage(), Toast.LENGTH_LONG).show();
-//
-//            }
-//
-//
-//        }) {
-//
-//            @Override
-//            public Map<String, String> getHeaders() throws AuthFailureError {
-//                Map<String, String> params = new HashMap<String, String>();
-//                sessionManager = new SessionManager(getApplicationContext());
-//                HashMap<String, String> user = sessionManager.getUserDetails();
-//                String accessToken = user.get("token");
-//
-//                String bearer = "Bearer " + accessToken;
-//                Map<String, String> headersSys = super.getHeaders();
-//                Map<String, String> headers = new HashMap<String, String>();
-//                headersSys.remove("Authorization");
-//                headers.put("Authorization", bearer);
-//                headers.putAll(headersSys);
-//                return headers;
-//            }
-//        };
-//
-//
-//        MySingleton.getInstance(this).addToRequestQueue(stringRequest);
-//
-//
-//        int socketTimeout = 30000;
-//        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
-//        stringRequest.setRetryPolicy(policy);
-//        requestQueue.add(stringRequest);
-//
-//
-//    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.refresh, menu);
+        getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
 

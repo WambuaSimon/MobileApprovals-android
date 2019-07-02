@@ -11,10 +11,16 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/another_logo"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light">
-        <activity android:name=".ui.Timer2">
+        android:theme="@style/AppTheme">
+        <activity android:name=".ui.Activity_UserDocumentDetails">
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.wizag.mobileapprovals.ui.Activity_UserDocumentDetails" />
 
         </activity>
+        <activity android:name=".ui.Activity_History" />
+        <activity android:name=".ui.Timer2" />
         <activity android:name=".ui.Activity_UserDocuments" />
         <activity android:name=".ui.Activity_Approval" />
         <activity android:name=".ui.Activity_Login">

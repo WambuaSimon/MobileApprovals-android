@@ -3,11 +3,14 @@ package com.wizag.mobileapprovals.ui;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,6 +30,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.wizag.mobileapprovals.R;
 import com.wizag.mobileapprovals.adapters.UserDocAdapter;
+import com.wizag.mobileapprovals.models.Approvers;
 import com.wizag.mobileapprovals.models.UserDocsModel;
 import com.wizag.mobileapprovals.utils.MySingleton;
 import com.wizag.mobileapprovals.utils.SessionManager;
@@ -50,18 +54,29 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
     SessionManager sessionManager;
     Context context;
     String DocType;
+    String AppStatus;
     String reason;
     TextView empty_view;
     String groupID;
     String id_to_update;
+    ArrayList<Approvers> approverList;
+    String approverGrpId;
+    String appStatus = "0";
+    String isApproved;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_documents);
-        setTitle("Documents");
+
+        Toolbar myToolbar = findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+
+
+
         sessionManager = new SessionManager(getApplicationContext());
         context = this;
+        approverList = new ArrayList<>();
 
         empty_view = findViewById(R.id.empty_view);
         sessionManager = new SessionManager(getApplicationContext());
@@ -70,103 +85,146 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
             groupID = user.get("GroupID");
         }
         recyclerView = findViewById(R.id.recyclerView);
-
-
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         docsModelList = new ArrayList<>();
 
-        loadDocuments();
+        if (isNetworkConnected()) {
+            loadDocuments();
+        } else {
+            Toasty.error(getApplicationContext(), "Ensure you have internet connection", Toasty.LENGTH_LONG).show();
+
+        }
 
 
         //initializing adapter
         userDocsAdapter = new UserDocAdapter(docsModelList, this, new UserDocAdapter.UsersAdapterListener() {
             @Override
-            public void approveOnClick(View v, final int position) {
+            public void itemClick(View v, int position) {
+                Intent intent = new Intent(getApplicationContext(), Activity_UserDocumentDetails.class);
+
                 id_to_update = docsModelList.get(position).DocType;
 
+                String doc_date = docsModelList.get(position).getDocDate();
+                String doc_name = docsModelList.get(position).getDocName();
+                String account_name = docsModelList.get(position).getAccountName();
+                String exl_amt = docsModelList.get(position).getExclAmt();
+                String incl_amt = docsModelList.get(position).getInclAmt();
+                String vat = docsModelList.get(position).getVATAmt();
 
-                final AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
-                        context);
+                String price = docsModelList.get(position).getPrice();
+                String quantity = docsModelList.get(position).getQuantity();
 
+                Double totalPrice = Double.parseDouble(docsModelList.get(position).getPrice()) * Double.parseDouble(docsModelList.get(position).getQuantity());
+                String total = String.valueOf(totalPrice);
 
-                alertDialog2.setTitle("Confirm Approval");
+                intent.putExtra("DocType", id_to_update);
+                intent.putExtra("doc_date", doc_date);
+                intent.putExtra("doc_name", doc_name);
+                intent.putExtra("account_name", account_name);
+                intent.putExtra("exl_amt", exl_amt);
+                intent.putExtra("incl_amt", incl_amt);
+                intent.putExtra("vat", vat);
+                intent.putExtra("price", price);
+                intent.putExtra("quantity", quantity);
+                intent.putExtra("total", total);
 
+                startActivity(intent);
 
-                alertDialog2.setMessage("Are you sure you want to approve this document?");
+//                docsModelList.remove(position);
+//                userDocsAdapter.notifyDataSetChanged();
 
-
-                alertDialog2.setPositiveButton("YES",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                // Write your code here to execute after dialog
-
-
-                                approve();
-                                docsModelList.remove(position);
-                                userDocsAdapter.notifyDataSetChanged();
-                            }
-                        });
-
-                alertDialog2.setNegativeButton("NO",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                // Write your code here to execute after dialog
-
-                                dialog.cancel();
-                            }
-                        });
-
-
-                alertDialog2.show();
 
             }
 
-            @Override
-            public void rejectOnClick(View v, final int position) {
-                id_to_update = docsModelList.get(position).DocType;
 
+//                final AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
+//                        context);
+//
+//
+//                alertDialog2.setTitle("Confirm Approval");
+//
+//
+//                alertDialog2.setMessage("Are you sure you want to approve this document?");
+//
+//
+//                alertDialog2.setPositiveButton("YES",
+//                        new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                // Write your code here to execute after dialog
+//
+//
+//                                approve();
+//                                docsModelList.remove(position);
+//                                userDocsAdapter.notifyDataSetChanged();
+//                            }
+//                        });
+//
+//                alertDialog2.setNegativeButton("NO",
+//                        new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                // Write your code here to execute after dialog
+//
+//                                dialog.cancel();
+//                            }
+//                        });
+//
+//
+//                alertDialog2.show();
+//
+//            }
+//
+//            @Override
+//            public void rejectOnClick(View v, final int position) {
+//                id_to_update = docsModelList.get(position).DocType;
+//
+//
+//                final AlertDialog.Builder alert = new AlertDialog.Builder(
+//                        context);
+//
+//                final EditText edittext = new EditText(getApplicationContext());
+//                edittext.setPadding(7, 7, 7, 7);
+//                edittext.setTextColor(getResources().getColor(R.color.black));
+//
+////                alert.setMessage("Enter Your Message");
+//                alert.setTitle("Reason for Rejecting");
+//
+//                alert.setView(edittext);
+//
+//                alert.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int whichButton) {
+//                        reason = edittext.getText().toString();
+//                        if (reason.isEmpty()) {
+//                            edittext.setError("Enter Reason to proceed");
+//                        } else {
+//
+//                            reject();
+//                            docsModelList.remove(position);
+//                            userDocsAdapter.notifyDataSetChanged();
+//                        }
+//                    }
+//                });
+//
+//                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int whichButton) {
+//                        // what ever you want to do with No option.
+//                    }
+//                });
+//
+//                alert.show();
 
-                final AlertDialog.Builder alert = new AlertDialog.Builder(
-                        context);
-
-                final EditText edittext = new EditText(getApplicationContext());
-                edittext.setPadding(7, 7, 7, 7);
-                edittext.setTextColor(getResources().getColor(R.color.black));
-
-//                alert.setMessage("Enter Your Message");
-                alert.setTitle("Reason for Rejecting");
-
-                alert.setView(edittext);
-
-                alert.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        reason = edittext.getText().toString();
-                        if (reason.isEmpty()) {
-                            edittext.setError("Enter Reason to proceed");
-                        } else {
-
-                            reject();
-                            docsModelList.remove(position);
-                            userDocsAdapter.notifyDataSetChanged();
-                        }
-                    }
-                });
-
-                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        // what ever you want to do with No option.
-                    }
-                });
-
-                alert.show();
-            }
         });
 
 
         recyclerView.setAdapter(userDocsAdapter);
 
     }
+
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        return cm.getActiveNetworkInfo() != null;
+    }
+
 
     private void loadDocuments() {
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
@@ -196,78 +254,91 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                                 UserDocsModel model_docs = new UserDocsModel();
                                 JSONObject docsObject = documents.getJSONObject(k);
 
-                                String isApproved = docsObject.getString("IsApproved");
+                                isApproved = docsObject.getString("IsApproved");
                                 JSONArray sequenceID = docsObject.getJSONArray("SequenceID");
                                 for (int p = 0; p < sequenceID.length(); p++) {
+
                                     JSONObject sequenceObject = sequenceID.getJSONObject(p);
                                     String seq_id = sequenceObject.getString("id");
+                                    Log.d("SequenceIDString", seq_id);
 
-                                    if (seq_id.contains(groupID) && !isApproved.equalsIgnoreCase("1")) {
+                                    Approvers approvers = new Approvers();
+                                    approvers.setSequenceID(seq_id);
+                                    approverList.add(approvers);
+                                    for (int z = 0; z < approverList.size(); z++) {
+
+                                        approverGrpId = approverList.get(z).toString();
+                                    }
 
 
-                                        JSONObject singleDoc = docsObject.getJSONObject("document");
-                                        String AppStatus = singleDoc.getString("AppStatus");
+//                                    String approverPosition  = sequenceId.get()
 
-                                        if (singleDoc != null && AppStatus.equalsIgnoreCase("0")) {
+                                    if (seq_id.contains(groupID)) {
+                                        if (approverGrpId.equalsIgnoreCase("0")) {
+                                            appStatus = "2";
+                                        }
 
-                                            /*Load Documents*/
+                                        JSONObject singleDoc = null;
+                                        try {
+                                            singleDoc = docsObject.getJSONObject("document");
 
+
+                                            AppStatus = singleDoc.getString("AppStatus");
                                             DocType = singleDoc.getString("DocType");
                                             String DocName = singleDoc.getString("DocName");
                                             String AccountName = singleDoc.getString("AccountName");
                                             String DocDate = singleDoc.getString("DocDate");
-                                            String ExclAmt = singleDoc.getString("ExclAmt");
-                                            String VATAmt = singleDoc.getString("VATAmt");
-                                            String InclAmt = singleDoc.getString("InclAmt");
+//                                            String total = singleDoc.getString("Total");
+                                            String price = singleDoc.getString("Price");
+                                            String quantity = singleDoc.getString("Quantity");
 
+                                            String exc = singleDoc.getString("ExclAmt");
+                                            String incl = singleDoc.getString("InclAmt");
+                                            String vat = singleDoc.getString("VATAmt");
 
+//                                                if(AppStatus == "0"){
+//
+//                                                }
 
-                                            if (DocType.equalsIgnoreCase("1")) {
-                                                DocName = "Invoice";
-                                            } else if (DocType.equalsIgnoreCase("2")) {
-                                                DocName = "PO";
-                                            } else if (DocType.equalsIgnoreCase("3")) {
-                                                DocName = "Credit Note";
-                                            } else if (DocType.equalsIgnoreCase("4")) {
-                                                DocName = "PO";
-                                            } else if (DocType.equalsIgnoreCase("5")) {
-                                                DocName = "Receipt";
-                                            } else if (DocType.equalsIgnoreCase("6")) {
-                                                DocType = "Cash Memo";
-                                            } else if (DocType.equalsIgnoreCase("7")) {
-                                                DocName = "Supplier Note";
-                                            } else {
-                                                DocName = "Cheque";
-                                            }
 
                                             model_docs.setDocType(DocType);
                                             model_docs.setDocName(DocName);
                                             model_docs.setAccountName(AccountName);
                                             model_docs.setDocDate(DocDate);
-                                            model_docs.setExclAmt("Excl:\t" + ExclAmt);
-                                            model_docs.setVATAmt("Vat:\t" + VATAmt);
-                                            model_docs.setInclAmt("Incl:\t" + InclAmt);
-                                            model_docs.setAppStatus(AppStatus);
+//                                            model_docs.setTotal(total);
+                                            model_docs.setPrice(price);
+                                            model_docs.setQuantity(quantity);
+                                            model_docs.setExclAmt(exc);
+                                            model_docs.setInclAmt(incl);
+                                            model_docs.setVATAmt(vat);
 
-                                            Log.d("DocType", DocType);
 
+                                        } catch (JSONException e1) {
+                                            e1.printStackTrace();
+                                        }
+//
+
+                                        Log.d("DocType", DocType);
+
+                                        if (!docsModelList.contains(DocType)) {
                                             docsModelList.add(model_docs);
-
-
                                         }
 
-                                    }
 
+                                    }
 
                                 }
 
 
                             }
+
+
                         }
                     }
 
 
-                } catch (JSONException e) {
+                } catch (
+                        JSONException e) {
                     e.printStackTrace();
                 }
                 userDocsAdapter.notifyDataSetChanged();
@@ -303,7 +374,9 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
         };
 
 
-        MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+        MySingleton.getInstance(this).
+
+                addToRequestQueue(stringRequest);
 
 
         int socketTimeout = 30000;
@@ -327,7 +400,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
+        getMenuInflater().inflate(R.menu.user_menu, menu);
         return true;
     }
 
@@ -344,6 +417,9 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 //            return true;
         } else if (id == R.id.refresh) {
             loadDocuments();
+
+        } else if (id == R.id.history) {
+            /*open history activity*/
 
         }
 
@@ -366,168 +442,6 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                 .show();
     }
 
-
-    private void approve() {
-        com.android.volley.RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-        final ProgressDialog pDialog = new ProgressDialog(this);
-        pDialog.setMessage("Loading...");
-        pDialog.setCancelable(false);
-        pDialog.show();
-
-        // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.PUT, "http://approvals.wizag.biz/api/v1/documents/" + id_to_update,
-                new com.android.volley.Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            //check status if success login user
-                            JSONObject jsonObject = new JSONObject(response);
-                            pDialog.dismiss();
-                            String success = jsonObject.getString("success");
-                            String message = jsonObject.getString("message");
-
-
-                            if (success == "true") {
-                                Toasty.success(getApplicationContext(), message, Toast.LENGTH_LONG).show();
-
-                            } else {
-                                Toasty.error(getApplicationContext(), "Error in updating document", Toast.LENGTH_LONG).show();
-
-                            }
-
-
-                        } catch (JSONException e1) {
-                            e1.printStackTrace();
-                        }
-
-
-                        //Toast.makeText(Activity_Buy.this, "", Toast.LENGTH_SHORT).show();
-                    }
-                }, new com.android.volley.Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-//                error.printStackTrace();
-                Toasty.error(getApplicationContext(), "An Error Occurred", Toast.LENGTH_SHORT).show();
-
-
-                pDialog.dismiss();
-            }
-        }) {
-            //adding parameters to the request
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-                params.put("AppStatus", "1");
-                params.put("RejectionReason", "");
-                return params;
-
-
-            }
-
-
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>();
-                SessionManager sessionManager = new SessionManager(getApplicationContext());
-                HashMap<String, String> user = sessionManager.getUserDetails();
-                String accessToken = user.get("token");
-                String bearer = "Bearer " + accessToken;
-                Map<String, String> headersSys = super.getHeaders();
-                Map<String, String> headers = new HashMap<String, String>();
-                headersSys.remove("Authorization");
-                headers.put("Authorization", bearer);
-
-                headers.putAll(headersSys);
-                return headers;
-            }
-
-
-        };
-// Add the request to the RequestQueue.
-        queue.add(stringRequest);
-
-    }
-
-    private void reject() {
-        com.android.volley.RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-        final ProgressDialog pDialog = new ProgressDialog(this);
-        pDialog.setMessage("Loading...");
-        pDialog.setCancelable(false);
-        pDialog.show();
-
-        // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.PUT, "http://approvals.wizag.biz/api/v1/documents/" + id_to_update,
-                new com.android.volley.Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            //check status if success login user
-                            JSONObject jsonObject = new JSONObject(response);
-                            pDialog.dismiss();
-                            String success = jsonObject.getString("success");
-                            String message = jsonObject.getString("message");
-
-
-                            if (success == "true") {
-                                Toasty.success(getApplicationContext(), message, Toast.LENGTH_LONG).show();
-
-                            } else {
-                                Toasty.error(getApplicationContext(), "Error in updating document", Toast.LENGTH_LONG).show();
-
-                            }
-
-
-                        } catch (JSONException e1) {
-                            e1.printStackTrace();
-                        }
-
-
-                        //Toast.makeText(Activity_Buy.this, "", Toast.LENGTH_SHORT).show();
-                    }
-                }, new com.android.volley.Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-//                error.printStackTrace();
-                Toasty.error(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
-
-
-                pDialog.dismiss();
-            }
-        }) {
-            //adding parameters to the request
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-                params.put("AppStatus", "0");
-                params.put("RejectionReason", reason);
-                return params;
-
-
-            }
-
-
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>();
-
-                HashMap<String, String> user = sessionManager.getUserDetails();
-                String accessToken = user.get("token");
-                String bearer = "Bearer " + accessToken;
-                Map<String, String> headersSys = super.getHeaders();
-                Map<String, String> headers = new HashMap<String, String>();
-                headersSys.remove("Authorization");
-                headers.put("Authorization", bearer);
-
-                headers.putAll(headersSys);
-                return headers;
-            }
-
-
-        };
-// Add the request to the RequestQueue.
-        queue.add(stringRequest);
-
-    }
 
     private void toggleEmptyNotes() {
         if (docsModelList.size() > 0) {

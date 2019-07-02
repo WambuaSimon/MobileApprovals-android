@@ -11,6 +11,7 @@ package com.wizag.mobileapprovals.models;
     public String InclAmt;
     public String StatusDescription;
 
+
     public String getDocType() {
         return DocType;
     }
@@ -83,4 +84,5 @@ package com.wizag.mobileapprovals.models;
         StatusDescription = statusDescription;
     }
 
-}
+
+ }

@@ -15,7 +15,7 @@
     <item
         android:title="refresh"
         android:id="@+id/refresh"
-        android:icon="@drawable/resized_refresh"
+        android:icon="@drawable/refresh"
         app:showAsAction="always" />
 
 

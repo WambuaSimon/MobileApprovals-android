@@ -1,11 +1,11 @@
 package com.wizag.mobileapprovals.adapters;
 
 import android.content.Context;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.wizag.mobileapprovals.R;
@@ -25,12 +25,10 @@ public class UserDocAdapter extends RecyclerView.Adapter<UserDocAdapter.MyViewHo
         TextView doc_date;
         TextView doc_name;
         TextView account_name;
-        TextView exl_amt;
-        TextView incl_amt;
-        TextView vat;
-
-        Button reject;
-        Button approve;
+        TextView quantity;
+        TextView price;
+        TextView total;
+        CardView card;
 
         public MyViewHolder(View itemView) {
             super(itemView);
@@ -38,11 +36,12 @@ public class UserDocAdapter extends RecyclerView.Adapter<UserDocAdapter.MyViewHo
             this.doc_date = itemView.findViewById(R.id.doc_date);
             this.doc_name = itemView.findViewById(R.id.doc_name);
             this.account_name = itemView.findViewById(R.id.account_name);
-            this.exl_amt = itemView.findViewById(R.id.exl_amt);
-            this.incl_amt = itemView.findViewById(R.id.incl_amt);
-            this.vat = itemView.findViewById(R.id.vat);
-            this.reject = itemView.findViewById(R.id.reject);
-            this.approve = itemView.findViewById(R.id.approve);
+            this.quantity = itemView.findViewById(R.id.quantity);
+            this.price = itemView.findViewById(R.id.price);
+            this.total = itemView.findViewById(R.id.total);
+            this.card = itemView.findViewById(R.id.card);
+
+
         }
     }
 
@@ -67,35 +66,34 @@ public class UserDocAdapter extends RecyclerView.Adapter<UserDocAdapter.MyViewHo
         TextView doc_date = holder.doc_date;
         TextView doc_name = holder.doc_name;
         TextView account_name = holder.account_name;
-        TextView exl_amt = holder.exl_amt;
-        TextView incl_amt = holder.incl_amt;
-        TextView vat = holder.vat;
-        Button reject = holder.reject;
-        Button approve = holder.approve;
+        TextView quantity = holder.quantity;
+        TextView price = holder.price;
+        TextView total = holder.total;
+        CardView card = holder.card;
 
         doc_type.setText(docsData.get(listPosition).getDocType());
         doc_date.setText(docsData.get(listPosition).getDocDate());
         doc_name.setText(docsData.get(listPosition).getDocName());
         account_name.setText(docsData.get(listPosition).getAccountName());
-        exl_amt.setText(docsData.get(listPosition).getExclAmt());
-        incl_amt.setText(docsData.get(listPosition).getInclAmt());
-        vat.setText(docsData.get(listPosition).getVATAmt());
 
-        approve.setOnClickListener(new View.OnClickListener() {
+        quantity.setText("Quantity: " +docsData.get(listPosition).getQuantity());
+        price.setText("Price: " +docsData.get(listPosition).getPrice());
+
+        Double qty = Double.valueOf(docsData.get(listPosition).getQuantity());
+        Double prc = Double.valueOf(docsData.get(listPosition).getPrice());
+
+
+        Double totalPrice = qty * prc;
+
+        total.setText("Total: " +totalPrice);
+
+        card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onClickListener.approveOnClick(v, listPosition);
-
+                onClickListener.itemClick(v, listPosition);
             }
         });
 
-        reject.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClickListener.rejectOnClick(v, listPosition);
-
-            }
-        });
 
 
     }
@@ -108,9 +106,7 @@ public class UserDocAdapter extends RecyclerView.Adapter<UserDocAdapter.MyViewHo
 
     public interface UsersAdapterListener {
 
-        void approveOnClick(View v, int position);
-
-        void rejectOnClick(View v, int position);
+        void itemClick(View v, int position);
 
     }
 }

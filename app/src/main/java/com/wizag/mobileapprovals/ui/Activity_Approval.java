@@ -145,7 +145,7 @@ public class Activity_Approval extends AppCompatActivity {
                     pDialog.dismiss();
                     if (jsonObject != null) {
                         String message = jsonObject.getString("message");
-                        Toasty.success(getApplicationContext(), "User Groups Loaded Successfully", Toasty.LENGTH_LONG).show();
+                        Toasty.success(getApplicationContext(), "User Groups Loaded Successfully", Toasty.LENGTH_SHORT).show();
                         docs = jsonObject.getJSONArray("groups");
                         approval_model.clear();
                         for (int k = 0; k < docs.length(); k++) {
@@ -196,7 +196,7 @@ public class Activity_Approval extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
 //                error.printStackTrace();
                 pDialog.dismiss();
-                Toasty.error(getApplicationContext(), "An Error Occurred" + error.getMessage(), Toast.LENGTH_LONG).show();
+                Toasty.error(getApplicationContext(), "An Error Occurred" + error.getMessage(), Toast.LENGTH_SHORT).show();
 
             }
 
@@ -209,7 +209,6 @@ public class Activity_Approval extends AppCompatActivity {
                 SessionManager sessionManager = new SessionManager(getApplicationContext());
                 HashMap<String, String> user = sessionManager.getUserDetails();
                 String accessToken = user.get("token");
-
                 String bearer = "Bearer " + accessToken;
                 Map<String, String> headersSys = super.getHeaders();
                 Map<String, String> headers = new HashMap<String, String>();
@@ -264,7 +263,7 @@ public class Activity_Approval extends AppCompatActivity {
                                 finish();
 
                             } else {
-                                Toasty.error(Activity_Approval.this, "Error in creating workflow", Toast.LENGTH_LONG).show();
+                                Toasty.error(Activity_Approval.this, "Error in creating workflow", Toast.LENGTH_SHORT).show();
 
                             }
 
@@ -296,6 +295,7 @@ public class Activity_Approval extends AppCompatActivity {
                 params.put("GroupID", grp_id);
                 params.put("AgentID", agent_id);
                 params.put("IsApproved", status);
+
                 Log.d("SequenceIDString", array.toString());
                 return params;
             }

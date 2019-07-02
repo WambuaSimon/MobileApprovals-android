@@ -2,6 +2,7 @@ package com.wizag.mobileapprovals.network;
 
 import android.content.Context;
 
+import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import com.wizag.mobileapprovals.utils.SessionManager;
 
 import java.io.IOException;
@@ -42,6 +43,7 @@ public class APIClient {
         retrofit = new Retrofit.Builder()
                 .baseUrl("http://approvals.wizag.biz/api/v1/")
                 .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .client(client)
                 .build();
 
