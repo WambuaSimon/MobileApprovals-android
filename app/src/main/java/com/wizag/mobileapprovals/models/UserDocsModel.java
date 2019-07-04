@@ -2,6 +2,8 @@ package com.wizag.mobileapprovals.models;
 
 public class UserDocsModel {
     public String DocType;
+    public String DocId;
+
     public String AppStatus;
     public String DocName;
     public String AccountName;
@@ -13,6 +15,14 @@ public class UserDocsModel {
     public String quantity;
     public String price;
     public String total;
+
+    public String getDocId() {
+        return DocId;
+    }
+
+    public void setDocId(String docId) {
+        DocId = docId;
+    }
 
     public String getQuantity() {
         return quantity;

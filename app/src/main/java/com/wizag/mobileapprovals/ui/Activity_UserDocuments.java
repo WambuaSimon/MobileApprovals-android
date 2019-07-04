@@ -62,7 +62,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
     ArrayList<Approvers> approverList;
     String approverGrpId;
     String appStatus = "0";
-    String isApproved;
+    String DocId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +71,6 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
         Toolbar myToolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
-
 
 
         sessionManager = new SessionManager(getApplicationContext());
@@ -254,9 +253,10 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                                 UserDocsModel model_docs = new UserDocsModel();
                                 JSONObject docsObject = documents.getJSONObject(k);
 
-                                isApproved = docsObject.getString("IsApproved");
+
                                 JSONArray sequenceID = docsObject.getJSONArray("SequenceID");
                                 for (int p = 0; p < sequenceID.length(); p++) {
+
 
                                     JSONObject sequenceObject = sequenceID.getJSONObject(p);
                                     String seq_id = sequenceObject.getString("id");
@@ -271,62 +271,50 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                                     }
 
 
-//                                    String approverPosition  = sequenceId.get()
-
-                                    if (seq_id.contains(groupID)) {
-                                        if (approverGrpId.equalsIgnoreCase("0")) {
-                                            appStatus = "2";
-                                        }
-
-                                        JSONObject singleDoc = null;
-                                        try {
-                                            singleDoc = docsObject.getJSONObject("document");
-
-
-                                            AppStatus = singleDoc.getString("AppStatus");
-                                            DocType = singleDoc.getString("DocType");
-                                            String DocName = singleDoc.getString("DocName");
-                                            String AccountName = singleDoc.getString("AccountName");
-                                            String DocDate = singleDoc.getString("DocDate");
-//                                            String total = singleDoc.getString("Total");
-                                            String price = singleDoc.getString("Price");
-                                            String quantity = singleDoc.getString("Quantity");
-
-                                            String exc = singleDoc.getString("ExclAmt");
-                                            String incl = singleDoc.getString("InclAmt");
-                                            String vat = singleDoc.getString("VATAmt");
-
-//                                                if(AppStatus == "0"){
-//
-//                                                }
-
-
-                                            model_docs.setDocType(DocType);
-                                            model_docs.setDocName(DocName);
-                                            model_docs.setAccountName(AccountName);
-                                            model_docs.setDocDate(DocDate);
-//                                            model_docs.setTotal(total);
-                                            model_docs.setPrice(price);
-                                            model_docs.setQuantity(quantity);
-                                            model_docs.setExclAmt(exc);
-                                            model_docs.setInclAmt(incl);
-                                            model_docs.setVATAmt(vat);
-
-
-                                        } catch (JSONException e1) {
-                                            e1.printStackTrace();
-                                        }
-//
-
-                                        Log.d("DocType", DocType);
-
-                                        if (!docsModelList.contains(DocType)) {
-                                            docsModelList.add(model_docs);
-                                        }
-
-
+                                    if (approverGrpId.equalsIgnoreCase("0")) {
+                                        appStatus = "2";
                                     }
+                                }
+                                JSONObject singleDoc = null;
+                                try {
+                                    singleDoc = docsObject.getJSONObject("document");
 
+                                    DocId = singleDoc.getString("DocId");
+                                    DocType = singleDoc.getString("DocType");
+                                    String DocName = singleDoc.getString("DocName");
+                                    String AccountName = singleDoc.getString("AccountName");
+                                    String DocDate = singleDoc.getString("DocDate");
+                                    String price = singleDoc.getString("Price");
+                                    String quantity = singleDoc.getString("Quantity");
+                                    String exc = singleDoc.getString("ExclAmt");
+                                    String incl = singleDoc.getString("InclAmt");
+                                    String vat = singleDoc.getString("VATAmt");
+
+
+                                    model_docs.setDocType(DocType);
+                                    model_docs.setDocName(DocName);
+                                    model_docs.setAccountName(AccountName);
+                                    model_docs.setDocDate(DocDate);
+                                    model_docs.setPrice(price);
+                                    model_docs.setQuantity(quantity);
+                                    model_docs.setExclAmt(exc);
+                                    model_docs.setInclAmt(incl);
+                                    model_docs.setVATAmt(vat);
+
+
+                                } catch (JSONException e1) {
+                                    e1.printStackTrace();
+                                }
+//
+
+                                Log.d("DocType", DocType);
+
+                                if (docsModelList.contains(DocId)) {
+
+
+                                } else {
+
+                                    docsModelList.add(model_docs);
                                 }
 
 
@@ -334,7 +322,11 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
 
                         }
+
+
                     }
+
+//                    }
 
 
                 } catch (
@@ -342,8 +334,8 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                     e.printStackTrace();
                 }
                 userDocsAdapter.notifyDataSetChanged();
-
                 toggleEmptyNotes();
+
             }
         }, new Response.ErrorListener() {
             @Override

@@ -99,6 +99,7 @@ public class Activity_Approval extends AppCompatActivity {
                     JSONObject obj = new JSONObject();
                     final ApprovalModel approvalModel = approval_model.get(i);
 
+
                     myList = new ArrayList<String>();
                     myList.add(approvalModel.getGroupID());
 
@@ -110,10 +111,10 @@ public class Activity_Approval extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     array.put(obj);
-//                    Log.d("approvals_details", array.toString());
-
 
                 }
+
+
                 postWorkflow();
 
             }
@@ -238,6 +239,9 @@ public class Activity_Approval extends AppCompatActivity {
         final String grp_id = user.get("GroupID");
         final String agent_id = user.get("AgentID");
 
+        /*get first element of array*/
+
+
         com.android.volley.RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
         final ProgressDialog pDialog = new ProgressDialog(this);
         pDialog.setMessage("Loading...");
@@ -278,7 +282,7 @@ public class Activity_Approval extends AppCompatActivity {
                 }, new com.android.volley.Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-//                error.printStackTrace();
+                error.printStackTrace();
                 Toasty.error(Activity_Approval.this, "An Error Occurred", Toast.LENGTH_SHORT).show();
 
 
@@ -293,8 +297,9 @@ public class Activity_Approval extends AppCompatActivity {
                 params.put("DocType", docType);
                 params.put("SequenceID", array.toString());
                 params.put("GroupID", grp_id);
-                params.put("AgentID", agent_id);
-                params.put("IsApproved", status);
+                params.put("LastGroup", "0");
+                params.put("LastAgent", "0");
+                params.put("NextGroup", "");
 
                 Log.d("SequenceIDString", array.toString());
                 return params;
