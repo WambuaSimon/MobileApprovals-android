@@ -55,6 +55,7 @@ public class Activity_Approval extends AppCompatActivity {
     LinearLayout parent_layout;
     String docType, status;
     JSONArray array;
+    String fId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,19 +99,11 @@ public class Activity_Approval extends AppCompatActivity {
                 for (int i = 0; i < approval_model.size(); i++) {
                     JSONObject obj = new JSONObject();
                     final ApprovalModel approvalModel = approval_model.get(i);
+                    array.put(approvalModel.getGroupID());
+                    Log.d("ArrayRecord",array.toString());
 
+                    fId = approval_model.get(0).getGroupID();
 
-                    myList = new ArrayList<String>();
-                    myList.add(approvalModel.getGroupID());
-
-                    try {
-                        obj.put("id", approvalModel.getGroupID());
-
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    array.put(obj);
 
                 }
 
@@ -239,6 +232,11 @@ public class Activity_Approval extends AppCompatActivity {
         final String grp_id = user.get("GroupID");
         final String agent_id = user.get("AgentID");
 
+        final String lastGrp = "0";
+        final String lastAgent = "0";
+        final String approvalStatus = "1";
+
+
         /*get first element of array*/
 
 
@@ -293,13 +291,17 @@ public class Activity_Approval extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
 
+
                 Map<String, String> params = new HashMap<>();
                 params.put("DocType", docType);
                 params.put("SequenceID", array.toString());
-                params.put("GroupID", grp_id);
-                params.put("LastGroup", "0");
-                params.put("LastAgent", "0");
-                params.put("NextGroup", "");
+                params.put("AgentID", agent_id);
+
+                params.put("LastGroup", lastGrp);
+                params.put("LastAgent", lastAgent);
+                params.put("NextGroup", fId);
+                params.put("ApprovalStatus", approvalStatus);
+
 
                 Log.d("SequenceIDString", array.toString());
                 return params;

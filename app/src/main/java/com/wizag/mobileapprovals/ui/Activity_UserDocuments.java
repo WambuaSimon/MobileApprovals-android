@@ -57,12 +57,14 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
     String AppStatus;
     String reason;
     TextView empty_view;
-    String groupID;
+    String groupID, agentID;
     String id_to_update;
     ArrayList<Approvers> approverList;
     String approverGrpId;
-    String appStatus = "0";
+    String appStatus;
     String DocId;
+    String next, curr;
+    String lastGrp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +84,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
         HashMap<String, String> user = sessionManager.getUserDetails();
         if (!user.isEmpty()) {
             groupID = user.get("GroupID");
+            agentID = user.get("AgentID");
         }
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
@@ -90,6 +93,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
         if (isNetworkConnected()) {
             loadDocuments();
+
         } else {
             Toasty.error(getApplicationContext(), "Ensure you have internet connection", Toasty.LENGTH_LONG).show();
 
@@ -127,90 +131,20 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                 intent.putExtra("price", price);
                 intent.putExtra("quantity", quantity);
                 intent.putExtra("total", total);
+                intent.putExtra("AppStatus", appStatus);
+
+                intent.putExtra("AgentID", agentID);
+                intent.putExtra("LastGroup", groupID);
+                intent.putExtra("LastAgent", agentID);
+                intent.putExtra("NextGroup", next);
+
+//                Toast.makeText(context, appStatus, Toast.LENGTH_SHORT).show();
 
                 startActivity(intent);
-
-//                docsModelList.remove(position);
-//                userDocsAdapter.notifyDataSetChanged();
 
 
             }
 
-
-//                final AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
-//                        context);
-//
-//
-//                alertDialog2.setTitle("Confirm Approval");
-//
-//
-//                alertDialog2.setMessage("Are you sure you want to approve this document?");
-//
-//
-//                alertDialog2.setPositiveButton("YES",
-//                        new DialogInterface.OnClickListener() {
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                // Write your code here to execute after dialog
-//
-//
-//                                approve();
-//                                docsModelList.remove(position);
-//                                userDocsAdapter.notifyDataSetChanged();
-//                            }
-//                        });
-//
-//                alertDialog2.setNegativeButton("NO",
-//                        new DialogInterface.OnClickListener() {
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                // Write your code here to execute after dialog
-//
-//                                dialog.cancel();
-//                            }
-//                        });
-//
-//
-//                alertDialog2.show();
-//
-//            }
-//
-//            @Override
-//            public void rejectOnClick(View v, final int position) {
-//                id_to_update = docsModelList.get(position).DocType;
-//
-//
-//                final AlertDialog.Builder alert = new AlertDialog.Builder(
-//                        context);
-//
-//                final EditText edittext = new EditText(getApplicationContext());
-//                edittext.setPadding(7, 7, 7, 7);
-//                edittext.setTextColor(getResources().getColor(R.color.black));
-//
-////                alert.setMessage("Enter Your Message");
-//                alert.setTitle("Reason for Rejecting");
-//
-//                alert.setView(edittext);
-//
-//                alert.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
-//                    public void onClick(DialogInterface dialog, int whichButton) {
-//                        reason = edittext.getText().toString();
-//                        if (reason.isEmpty()) {
-//                            edittext.setError("Enter Reason to proceed");
-//                        } else {
-//
-//                            reject();
-//                            docsModelList.remove(position);
-//                            userDocsAdapter.notifyDataSetChanged();
-//                        }
-//                    }
-//                });
-//
-//                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//                    public void onClick(DialogInterface dialog, int whichButton) {
-//                        // what ever you want to do with No option.
-//                    }
-//                });
-//
-//                alert.show();
 
         });
 
@@ -246,6 +180,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
                         JSONArray documents = jsonObject.getJSONArray("documents");
 
+
                         if (success.equalsIgnoreCase("true")) {
                             docsModelList.clear();
                             for (int k = 0; k < documents.length(); k++) {
@@ -254,79 +189,92 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                                 JSONObject docsObject = documents.getJSONObject(k);
 
 
+                                String nxtGrpId = docsObject.getString("NextGroup");
+                                lastGrp = docsObject.getString("LastGroup");
+//                                Toast.makeText(context, nxtGrpId, Toast.LENGTH_SHORT).show();
+
                                 JSONArray sequenceID = docsObject.getJSONArray("SequenceID");
                                 for (int p = 0; p < sequenceID.length(); p++) {
 
 
-                                    JSONObject sequenceObject = sequenceID.getJSONObject(p);
-                                    String seq_id = sequenceObject.getString("id");
-                                    Log.d("SequenceIDString", seq_id);
+                                    String seq_id = sequenceID.get(0).toString();
+                                    String finalVal = sequenceID.get(p-1).toString();
+                                    Log.d("SequenceIDString", finalVal);
+                                    Toast.makeText(context, finalVal, Toast.LENGTH_SHORT).show();
 
                                     Approvers approvers = new Approvers();
                                     approvers.setSequenceID(seq_id);
                                     approverList.add(approvers);
-                                    for (int z = 0; z < approverList.size(); z++) {
 
-                                        approverGrpId = approverList.get(z).toString();
+                                    for (int z = 0; z < approverList.size() - 1; z++) {
+                                        String grpToApprove = approverList.get(0).getSequenceID();
+
+
+                                        int seqIdPosition = approverList.size() - 1;
+                                        if (seqIdPosition != Integer.parseInt(groupID)) {
+                                            appStatus = "2";
+                                        } else if (Integer.parseInt(groupID) == Integer.parseInt(finalVal)) {
+                                            appStatus = "1";
+                                        }
+
                                     }
 
-
-                                    if (approverGrpId.equalsIgnoreCase("0")) {
-                                        appStatus = "2";
-                                    }
                                 }
+
+
                                 JSONObject singleDoc = null;
                                 try {
+
                                     singleDoc = docsObject.getJSONObject("document");
+                                    if (Integer.parseInt(groupID) == Integer.parseInt(nxtGrpId)) {
 
-                                    DocId = singleDoc.getString("DocId");
-                                    DocType = singleDoc.getString("DocType");
-                                    String DocName = singleDoc.getString("DocName");
-                                    String AccountName = singleDoc.getString("AccountName");
-                                    String DocDate = singleDoc.getString("DocDate");
-                                    String price = singleDoc.getString("Price");
-                                    String quantity = singleDoc.getString("Quantity");
-                                    String exc = singleDoc.getString("ExclAmt");
-                                    String incl = singleDoc.getString("InclAmt");
-                                    String vat = singleDoc.getString("VATAmt");
+                                        DocId = singleDoc.getString("DocId");
+                                        DocType = singleDoc.getString("DocType");
+                                        String DocName = singleDoc.getString("DocName");
+                                        String AccountName = singleDoc.getString("AccountName");
+                                        String DocDate = singleDoc.getString("DocDate");
+                                        String price = singleDoc.getString("Price");
+                                        String quantity = singleDoc.getString("Quantity");
+                                        String exc = singleDoc.getString("ExclAmt");
+                                        String incl = singleDoc.getString("InclAmt");
+                                        String vat = singleDoc.getString("VATAmt");
 
 
-                                    model_docs.setDocType(DocType);
-                                    model_docs.setDocName(DocName);
-                                    model_docs.setAccountName(AccountName);
-                                    model_docs.setDocDate(DocDate);
-                                    model_docs.setPrice(price);
-                                    model_docs.setQuantity(quantity);
-                                    model_docs.setExclAmt(exc);
-                                    model_docs.setInclAmt(incl);
-                                    model_docs.setVATAmt(vat);
+                                        model_docs.setDocType(DocType);
+                                        model_docs.setDocName(DocName);
+                                        model_docs.setAccountName(AccountName);
+                                        model_docs.setDocDate(DocDate);
+                                        model_docs.setPrice(price);
+                                        model_docs.setQuantity(quantity);
+                                        model_docs.setExclAmt(exc);
+                                        model_docs.setInclAmt(incl);
+                                        model_docs.setVATAmt(vat);
 
+
+                                        Log.d("DocType", DocType);
+
+                                        if (docsModelList.contains(DocId)) {
+
+
+                                        } else {
+
+                                            docsModelList.add(model_docs);
+                                        }
+
+                                    } else {
+                                        Toasty.warning(getApplicationContext(), "No Documents to approve at this time", Toasty.LENGTH_LONG).show();
+
+                                    }
 
                                 } catch (JSONException e1) {
                                     e1.printStackTrace();
                                 }
-//
-
-                                Log.d("DocType", DocType);
-
-                                if (docsModelList.contains(DocId)) {
-
-
-                                } else {
-
-                                    docsModelList.add(model_docs);
-                                }
-
 
                             }
-
-
                         }
 
 
                     }
-
-//                    }
 
 
                 } catch (
@@ -342,7 +290,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
             public void onErrorResponse(VolleyError error) {
                 error.printStackTrace();
                 pDialog.dismiss();
-                Toast.makeText(getApplicationContext(), "An Error Occurred" + error.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "An Error Occurred" + error.getMessage(), Toast.LENGTH_SHORT).show();
 
             }
 

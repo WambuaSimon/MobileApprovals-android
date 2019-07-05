@@ -34,7 +34,8 @@ public class Activity_UserDocumentDetails extends AppCompatActivity {
             quantity, price, total,
             exl_amt, incl_amt, vat;
     String reason;
-    String DocType;
+    String DocType,AppStatus;
+    String AgentID,LastGroup,LastAgent,NextGroup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +70,13 @@ public class Activity_UserDocumentDetails extends AppCompatActivity {
         String quantity_txt = intent.getStringExtra("quantity");
         String total_txt = intent.getStringExtra("total");
         DocType = intent.getStringExtra("DocType");
+        AppStatus = intent.getStringExtra("AppStatus");
+
+        AgentID = intent.getStringExtra("AgentID");
+        LastGroup = intent.getStringExtra("LastGroup");
+        LastAgent = intent.getStringExtra("LastAgent");
+        NextGroup = intent.getStringExtra("NextGroup");
+
 
         doc_name.setText(doc_name_txt);
         doc_date.setText(doc_date_txt);
@@ -140,6 +148,7 @@ public class Activity_UserDocumentDetails extends AppCompatActivity {
 
 
                                 approve();
+                                updateWorkflow();
 //                                docsModelList.remove(position);
 //                                userDocsAdapter.notifyDataSetChanged();
                             }
@@ -161,6 +170,94 @@ public class Activity_UserDocumentDetails extends AppCompatActivity {
             }
         });
 
+
+    }
+
+
+
+    private void updateWorkflow() {
+        com.android.volley.RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+        final ProgressDialog pDialog = new ProgressDialog(this);
+        pDialog.setMessage("Loading...");
+        pDialog.setCancelable(false);
+        pDialog.show();
+
+        // Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.PUT, "http://approvals.wizag.biz/api/v1/workflow/" + DocType,
+                new com.android.volley.Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            //check status if success login user
+                            JSONObject jsonObject = new JSONObject(response);
+                            pDialog.dismiss();
+                            String success = jsonObject.getString("success");
+                            String message = jsonObject.getString("message");
+
+
+                            if (success == "true") {
+                                Toasty.success(getApplicationContext(), message, Toasty.LENGTH_SHORT).show();
+
+                            } else {
+                                Toasty.error(getApplicationContext(), "Error in updating document", Toasty.LENGTH_SHORT).show();
+
+                            }
+
+
+                        } catch (JSONException e1) {
+                            e1.printStackTrace();
+                        }
+
+
+                        //Toast.makeText(Activity_Buy.this, "", Toast.LENGTH_SHORT).show();
+                    }
+                }, new com.android.volley.Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+                error.getMessage();
+                Toasty.error(getApplicationContext(), "An Error Occurred", Toasty.LENGTH_SHORT).show();
+
+
+                pDialog.dismiss();
+            }
+        }) {
+            //adding parameters to the request
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+//                params.put("SequenceID", );
+                params.put("AgentID",AgentID );
+                params.put("LastGroup",LastGroup );
+                params.put("LastAgent",LastAgent );
+                params.put("NextGroup","" );
+                params.put("ApprovalStatus",AppStatus );
+                return params;
+
+
+            }
+
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                SessionManager sessionManager = new SessionManager(getApplicationContext());
+                HashMap<String, String> user = sessionManager.getUserDetails();
+                String accessToken = user.get("token");
+                String bearer = "Bearer " + accessToken;
+                Map<String, String> headersSys = super.getHeaders();
+                Map<String, String> headers = new HashMap<String, String>();
+                headersSys.remove("Authorization");
+                headers.put("Authorization", bearer);
+
+                headers.putAll(headersSys);
+                return headers;
+            }
+
+
+        };
+// Add the request to the RequestQueue.
+        queue.add(stringRequest);
 
     }
 
@@ -214,7 +311,7 @@ public class Activity_UserDocumentDetails extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put("AppStatus", "1");
+                params.put("AppStatus", AppStatus);
                 params.put("RejectionReason", "");
                 return params;
 
@@ -295,7 +392,7 @@ public class Activity_UserDocumentDetails extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put("AppStatus", "0");
+                params.put("AppStatus", "4");
                 params.put("RejectionReason", reason);
                 return params;
 
