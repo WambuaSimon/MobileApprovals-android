@@ -138,8 +138,6 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                 intent.putExtra("LastAgent", agentID);
                 intent.putExtra("NextGroup", next);
 
-//                Toast.makeText(context, appStatus, Toast.LENGTH_SHORT).show();
-
                 startActivity(intent);
 
 
@@ -176,7 +174,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
                         String success = jsonObject.getString("success");
                         String message = jsonObject.getString("message");
-                        Toasty.success(context, message, Toast.LENGTH_SHORT).show();
+//                        Toasty.success(context, message, Toast.LENGTH_SHORT).show();
 
                         JSONArray documents = jsonObject.getJSONArray("documents");
 
@@ -191,42 +189,31 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
                                 String nxtGrpId = docsObject.getString("NextGroup");
                                 lastGrp = docsObject.getString("LastGroup");
-//                                Toast.makeText(context, nxtGrpId, Toast.LENGTH_SHORT).show();
 
+                                Approvers approvers = new Approvers();
                                 JSONArray sequenceID = docsObject.getJSONArray("SequenceID");
                                 for (int p = 0; p < sequenceID.length(); p++) {
-
-
-                                    String seq_id = sequenceID.get(0).toString();
-                                    String finalVal = sequenceID.get(p-1).toString();
-                                    Log.d("SequenceIDString", finalVal);
-                                    Toast.makeText(context, finalVal, Toast.LENGTH_SHORT).show();
-
-                                    Approvers approvers = new Approvers();
+                                    String seq_id = sequenceID.get(p).toString();
                                     approvers.setSequenceID(seq_id);
                                     approverList.add(approvers);
 
-                                    for (int z = 0; z < approverList.size() - 1; z++) {
-                                        String grpToApprove = approverList.get(0).getSequenceID();
-
-
-                                        int seqIdPosition = approverList.size() - 1;
-                                        if (seqIdPosition != Integer.parseInt(groupID)) {
-                                            appStatus = "2";
-                                        } else if (Integer.parseInt(groupID) == Integer.parseInt(finalVal)) {
-                                            appStatus = "1";
-                                        }
-
-                                    }
-
                                 }
+
+                                String lastGrp = approverList.get(approverList.size() - 1).getSequenceID();
+
+                                if (groupID.equalsIgnoreCase(lastGrp)) {
+                                    appStatus = "1";
+                                } else if (!groupID.equalsIgnoreCase(lastGrp)) {
+                                    appStatus = "2";
+                                }
+
 
 
                                 JSONObject singleDoc = null;
                                 try {
 
                                     singleDoc = docsObject.getJSONObject("document");
-                                    if (Integer.parseInt(groupID) == Integer.parseInt(nxtGrpId)) {
+                                    if (Integer.parseInt(groupID) == Integer.parseInt(nxtGrpId) && appStatus.equalsIgnoreCase("2")) {
 
                                         DocId = singleDoc.getString("DocId");
                                         DocType = singleDoc.getString("DocType");
@@ -259,16 +246,20 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                                         } else {
 
                                             docsModelList.add(model_docs);
+
                                         }
 
-                                    } else {
-                                        Toasty.warning(getApplicationContext(), "No Documents to approve at this time", Toasty.LENGTH_LONG).show();
-
                                     }
+//                                    else {
+//                                        Toasty.warning(getApplicationContext(), "No Documents to approve at this time", Toasty.LENGTH_LONG).show();
+//
+//                                    }
+
 
                                 } catch (JSONException e1) {
                                     e1.printStackTrace();
                                 }
+
 
                             }
                         }
@@ -277,13 +268,11 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
                     }
 
 
-                } catch (
-                        JSONException e) {
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 userDocsAdapter.notifyDataSetChanged();
                 toggleEmptyNotes();
-
             }
         }, new Response.ErrorListener() {
             @Override
@@ -314,10 +303,7 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
         };
 
 
-        MySingleton.getInstance(this).
-
-                addToRequestQueue(stringRequest);
-
+        MySingleton.getInstance(this).addToRequestQueue(stringRequest);
 
         int socketTimeout = 30000;
         RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
@@ -329,10 +315,10 @@ public class Activity_UserDocuments extends AppCompatActivity implements removeR
 
     @Override
     public boolean onItemRemoved(UserDocsModel userDocsModel) {
-        if (docsModelList.contains(userDocsModel)) {
-            docsModelList.remove(userDocsModel);
-            userDocsAdapter.notifyDataSetChanged();
-        }
+//        if (docsModelList.contains(userDocsModel)) {
+//            docsModelList.remove(userDocsModel);
+//            userDocsAdapter.notifyDataSetChanged();
+//        }
 
 
         return false;

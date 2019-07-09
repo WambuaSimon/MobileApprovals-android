@@ -34,8 +34,8 @@ public class Activity_UserDocumentDetails extends AppCompatActivity {
             quantity, price, total,
             exl_amt, incl_amt, vat;
     String reason;
-    String DocType,AppStatus;
-    String AgentID,LastGroup,LastAgent,NextGroup;
+    String DocType, AppStatus;
+    String AgentID, LastGroup, LastAgent, NextGroup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,6 +149,8 @@ public class Activity_UserDocumentDetails extends AppCompatActivity {
 
                                 approve();
                                 updateWorkflow();
+                                approve.setVisibility(View.GONE);
+
 //                                docsModelList.remove(position);
 //                                userDocsAdapter.notifyDataSetChanged();
                             }
@@ -172,7 +174,6 @@ public class Activity_UserDocumentDetails extends AppCompatActivity {
 
 
     }
-
 
 
     private void updateWorkflow() {
@@ -216,7 +217,7 @@ public class Activity_UserDocumentDetails extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
                 error.printStackTrace();
                 error.getMessage();
-                Toasty.error(getApplicationContext(), "An Error Occurred", Toasty.LENGTH_SHORT).show();
+//                Toasty.error(getApplicationContext(), "An Error Occurred", Toasty.LENGTH_SHORT).show();
 
 
                 pDialog.dismiss();
@@ -227,11 +228,11 @@ public class Activity_UserDocumentDetails extends AppCompatActivity {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
 //                params.put("SequenceID", );
-                params.put("AgentID",AgentID );
-                params.put("LastGroup",LastGroup );
-                params.put("LastAgent",LastAgent );
-                params.put("NextGroup","" );
-                params.put("ApprovalStatus",AppStatus );
+                params.put("AgentID", AgentID);
+                params.put("LastGroup", LastGroup);
+                params.put("LastAgent", LastAgent);
+                params.put("NextGroup", "");
+                params.put("ApprovalStatus", "");
                 return params;
 
 
@@ -300,7 +301,7 @@ public class Activity_UserDocumentDetails extends AppCompatActivity {
                 }, new com.android.volley.Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-//                error.printStackTrace();
+                error.printStackTrace();
                 Toasty.error(getApplicationContext(), "An Error Occurred", Toasty.LENGTH_SHORT).show();
 
 
@@ -311,7 +312,7 @@ public class Activity_UserDocumentDetails extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put("AppStatus", AppStatus);
+                params.put("AppStatus",AppStatus);
                 params.put("RejectionReason", "");
                 return params;
 

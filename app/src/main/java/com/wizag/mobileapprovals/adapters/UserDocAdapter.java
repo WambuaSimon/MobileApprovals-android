@@ -109,4 +109,5 @@ public class UserDocAdapter extends RecyclerView.Adapter<UserDocAdapter.MyViewHo
         void itemClick(View v, int position);
 
     }
+
 }
